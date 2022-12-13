@@ -1,7 +1,17 @@
 #include "stdafx.h"
 #include "Service.h"
 
-DWORD Service::Install(LPCTSTR path_name, DWORD start_type)
+DWORD Service::Install(LPCTSTR service_name, LPCTSTR path_name, DWORD start_type)
+{
+	return Install(service_name, service_name, _T(""), path_name, start_type);
+}
+
+DWORD Service::Install(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR path_name, DWORD start_type)
+{
+	return Install(service_name, display_name, _T(""), path_name, start_type);
+}
+
+DWORD Service::Install(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description, LPCTSTR path_name, DWORD start_type)
 {
 	DWORD error_id = ERROR_SUCCESS;
 
@@ -17,8 +27,8 @@ DWORD Service::Install(LPCTSTR path_name, DWORD start_type)
 
 	service = CreateService(
 		manager,
-		_T("TestService"),
-		_T("TestServiceDisplay"),
+		service_name,
+		display_name,
 		SERVICE_ALL_ACCESS,
 		SERVICE_WIN32_OWN_PROCESS,
 		start_type,
@@ -36,6 +46,14 @@ DWORD Service::Install(LPCTSTR path_name, DWORD start_type)
 	}
 	else
 	{
+		SERVICE_DESCRIPTION service_description;
+		service_description.lpDescription = (LPTSTR)description;
+
+		if (ChangeServiceConfig2(service, SERVICE_CONFIG_DESCRIPTION, &service_description) == FALSE)
+		{
+			// 설명 설정 실패에 대한 처리
+		}
+
 		if (CloseServiceHandle(service) == FALSE)
 		{
 			return GetLastError();
@@ -66,7 +84,7 @@ DWORD Service::Uninstall(LPCTSTR service_name)
 		return GetLastError();
 	}
 
-	service = OpenService(manager, _T("TestService"), SERVICE_ALL_ACCESS);
+	service = OpenService(manager, service_name, SERVICE_ALL_ACCESS);
 
 	if (service == nullptr)
 	{
