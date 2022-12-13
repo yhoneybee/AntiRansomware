@@ -3,19 +3,22 @@
 
 int _tmain(int argc, TCHAR* argv[])
 {
-	DWORD error = ERROR_SUCCESS;
+	setlocale(LC_ALL, "korean");
+
+	DWORD error_id = ERROR_SUCCESS;
 
 	Service service;
 
 	TCHAR module_name[MAX_PATH];
 	GetModuleFileName(nullptr, module_name, _countof(module_name));
-	error = service.Install(module_name, SERVICE_DEMAND_START);
 
-	std::cout << error << "\n";
+	error_id = service.Install(module_name, SERVICE_DEMAND_START);
 
-	error = service.Uninstall(_T("TestService"));
+	GetErrorMessage(error_id);
 
-	std::cout << error << "\n";
+	error_id = service.Uninstall(_T("TestService"));
+
+	GetErrorMessage(error_id);
 
 	return 0;
 }
