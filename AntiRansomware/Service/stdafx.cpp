@@ -44,7 +44,7 @@ DWORD PrintErrorMessage(DWORD error, LPCTSTR format)
 	}
 
 	LPTSTR message = new TCHAR[format_length + buffer_length + INT_MAXIMUM_POWER + 1 + NULL_SPACE];
-	HRESULT result = StringCchPrintf(message, STRSAFE_MAX_CCH, format, error_id, (LPTSTR)buffer);
+	HRESULT result = StringCchPrintf(message, STRSAFE_MAX_CCH, format, error, (LPTSTR)buffer);
 	_tprintf_s(message);
 	SAFE_DELETE_ARRAY(message);
 
