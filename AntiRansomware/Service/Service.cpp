@@ -3,14 +3,14 @@
 
 DWORD Service::Install(LPCTSTR path_name, DWORD start_type)
 {
-	DWORD error = ERROR_SUCCESS;
+	DWORD error_id = ERROR_SUCCESS;
 
 	SC_HANDLE manager = nullptr;
 	SC_HANDLE service = nullptr;
 
 	manager = OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
 
-	if (manager == NULL)
+	if (manager == nullptr)
 	{
 		return GetLastError();
 	}
@@ -30,9 +30,9 @@ DWORD Service::Install(LPCTSTR path_name, DWORD start_type)
 		nullptr,
 		nullptr);
 
-	if (service == NULL)
+	if (service == nullptr)
 	{
-		error = GetLastError();
+		error_id = GetLastError();
 	}
 	else
 	{
@@ -47,12 +47,12 @@ DWORD Service::Install(LPCTSTR path_name, DWORD start_type)
 		return GetLastError();
 	}
 
-	return error;
+	return error_id;
 }
 
 DWORD Service::Uninstall(LPCTSTR service_name)
 {
-	DWORD error = ERROR_SUCCESS;
+	DWORD error_id = ERROR_SUCCESS;
 
 	SC_HANDLE manager = nullptr;
 	SC_HANDLE service = nullptr;
@@ -61,16 +61,16 @@ DWORD Service::Uninstall(LPCTSTR service_name)
 
 	manager = OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
 
-	if (manager == NULL)
+	if (manager == nullptr)
 	{
 		return GetLastError();
 	}
 
 	service = OpenService(manager, _T("TestService"), SERVICE_ALL_ACCESS);
 
-	if (service == NULL)
+	if (service == nullptr)
 	{
-		error = GetLastError();
+		error_id = GetLastError();
 	}
 	else
 	{
@@ -105,5 +105,5 @@ DWORD Service::Uninstall(LPCTSTR service_name)
 		return GetLastError();
 	}
 
-	return error;
+	return error_id;
 }
