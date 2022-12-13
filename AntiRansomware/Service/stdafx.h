@@ -26,5 +26,5 @@ constexpr int NULL_SPACE = 1;
 constexpr int INT_MAXIMUM_POWER = 9;
 
 //	global functions
-DWORD GetErrorMessage(DWORD error);
-DWORD GetErrorMessage(DWORD error, LPCTSTR format);
+DWORD PrintErrorMessage(DWORD error);
+DWORD PrintErrorMessage(DWORD error, LPCTSTR format);

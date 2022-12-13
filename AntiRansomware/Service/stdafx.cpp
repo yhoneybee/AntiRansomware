@@ -1,11 +1,11 @@
 #include "stdafx.h"
 
-DWORD GetErrorMessage(DWORD error)
+DWORD PrintErrorMessage(DWORD error)
 {
-	return GetErrorMessage(error, _T("(%d) %s"));
+	return PrintErrorMessage(error, _T("(%d) %s"));
 }
 
-DWORD GetErrorMessage(DWORD error, LPCTSTR format)
+DWORD PrintErrorMessage(DWORD error, LPCTSTR format)
 {
 	DWORD error_id = ERROR_SUCCESS;
 

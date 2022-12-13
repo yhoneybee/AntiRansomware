@@ -14,11 +14,11 @@ int _tmain(int argc, TCHAR* argv[])
 
 	error_id = service.Install(module_name, SERVICE_DEMAND_START);
 
-	GetErrorMessage(error_id);
+	PrintErrorMessage(error_id);
 
 	error_id = service.Uninstall(_T("TestService"));
 
-	GetErrorMessage(error_id);
+	PrintErrorMessage(error_id);
 
 	return 0;
 }
