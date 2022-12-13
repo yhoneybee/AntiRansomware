@@ -12,8 +12,7 @@ DWORD Service::Install(LPCTSTR path_name, DWORD start_type)
 
 	if (manager == NULL)
 	{
-		error = GetLastError();
-		return error;
+		return GetLastError();
 	}
 
 	service = CreateService(
@@ -34,22 +33,21 @@ DWORD Service::Install(LPCTSTR path_name, DWORD start_type)
 	if (service == NULL)
 	{
 		error = GetLastError();
-		return error;
+	}
+	else
+	{
+		if (CloseServiceHandle(service) == FALSE)
+		{
+			return GetLastError();
+		}
 	}
 
 	if (CloseServiceHandle(manager) == FALSE)
 	{
-		error = GetLastError();
-		return error;
+		return GetLastError();
 	}
 
-	if (CloseServiceHandle(service) == FALSE)
-	{
-		error = GetLastError();
-		return error;
-	}
-
-	return ERROR_SUCCESS;
+	return error;
 }
 
 DWORD Service::Uninstall(LPCTSTR service_name)
@@ -65,8 +63,7 @@ DWORD Service::Uninstall(LPCTSTR service_name)
 
 	if (manager == NULL)
 	{
-		error = GetLastError();
-		return error;
+		return GetLastError();
 	}
 
 	service = OpenService(manager, _T("TestService"), SERVICE_ALL_ACCESS);
@@ -74,43 +71,39 @@ DWORD Service::Uninstall(LPCTSTR service_name)
 	if (service == NULL)
 	{
 		error = GetLastError();
-		return error;
+	}
+	else
+	{
+		if (QueryServiceStatus(service, &service_status) == FALSE)
+		{
+			return GetLastError();
+		}
+
+		if (service_status.dwCurrentState != SERVICE_STOPPED)
+		{
+			if (ControlService(service, SERVICE_CONTROL_STOP, &service_status) == FALSE)
+			{
+				return GetLastError();
+			}
+
+			Sleep(500);
+		}
+
+		if (DeleteService(service) == FALSE)
+		{
+			return GetLastError();
+		}
+
+		if (CloseServiceHandle(service) == FALSE)
+		{
+			return GetLastError();
+		}
 	}
 
 	if (CloseServiceHandle(manager) == FALSE)
 	{
-		error = GetLastError();
-		return error;
+		return GetLastError();
 	}
 
-	if (QueryServiceStatus(service, &service_status) == FALSE)
-	{
-		error = GetLastError();
-		return error;
-	}
-
-	if (service_status.dwCurrentState != SERVICE_STOPPED)
-	{
-		if (ControlService(service, SERVICE_CONTROL_STOP, &service_status) == FALSE)
-		{
-			error = GetLastError();
-			return error;
-		}
-
-		Sleep(500);
-	}
-
-	if (DeleteService(service) == FALSE)
-	{
-		error = GetLastError();
-		return error;
-	}
-
-	if (CloseServiceHandle(service) == FALSE)
-	{
-		error = GetLastError();
-		return error;
-	}
-
-	return ERROR_SUCCESS;
+	return error;
 }
