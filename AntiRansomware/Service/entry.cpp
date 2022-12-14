@@ -24,13 +24,26 @@ int APIENTRY _tmain(int argc, TCHAR* argv[])
 
 	_tprintf_s(_T("\t _tmain\n"));
 
-	if (argc > 0)
+	if (argc == 1)
+	{
+		SERVICE_TABLE_ENTRY entry_table[] =
+		{
+			{(LPTSTR)SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION)ServiceMain},
+			{nullptr,nullptr},
+		};
+
+		if (StartServiceCtrlDispatcher(entry_table) == false)
+		{
+			PrintErrorMessage(GetLastError(), _T("[!]\t\t StartServiceCtrlDispatcher -> %d, %s"));
+		}
+	}
+	else if (argc > 0)
 	{
 		if (lstrcmpi(argv[1], _T("-i")) == false)
 		{
 			ServiceInstall();
 		}
-		else if (lstrcmpi(argv[1], _T("-d")) == false)
+		else if (lstrcmpi(argv[1], _T("-u")) == false)
 		{
 			ServiceDelete();
 		}
@@ -41,19 +54,6 @@ int APIENTRY _tmain(int argc, TCHAR* argv[])
 		else if (lstrcmpi(argv[1], _T("-sp")) == false)
 		{
 			ServiceStop();
-		}
-		else
-		{
-			SERVICE_TABLE_ENTRY entry_table[] =
-			{
-				{(LPTSTR)SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION)ServiceMain},
-				{nullptr,nullptr},
-			};
-
-			if (StartServiceCtrlDispatcher(entry_table) == false)
-			{
-				PrintErrorMessage(GetLastError(), _T("[!]\t\t StartServiceCtrlDispatcher -> %d, %s"));
-			}
 		}
 	}
 
