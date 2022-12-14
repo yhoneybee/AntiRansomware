@@ -60,6 +60,17 @@ void BaseService::Install()
 		return;
 	}
 
+	SERVICE_DESCRIPTION service_description;
+	service_description.lpDescription = (LPTSTR)description_;
+
+	if (ChangeServiceConfig2(service, SERVICE_CONFIG_DESCRIPTION, &service_description) == false)
+	{
+		PrintErrorMessage(GetLastError(), _T("[!]\t\t ChangeServiceConfig2 -> %d, %s"));
+		CloseServiceHandle(service);
+		CloseServiceHandle(manager);
+		return;
+	}
+
 	CloseServiceHandle(service);
 	CloseServiceHandle(manager);
 }
