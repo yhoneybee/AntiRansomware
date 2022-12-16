@@ -7,7 +7,15 @@ public:
 	BaseService(
 		LPCTSTR service_name,
 		LPCTSTR display_name,
-		LPCTSTR description);
+		LPCTSTR description
+	);
+
+	BaseService(
+		LPCTSTR service_name,
+		LPCTSTR display_name,
+		LPCTSTR description,
+		LPCTSTR exe_path
+	);
 
 	virtual ~BaseService();
 public:
@@ -41,6 +49,7 @@ private:
 	LPCTSTR name_;
 	LPCTSTR display_;
 	LPCTSTR description_;
+	LPTSTR exe_path_;
 
 	SERVICE_STATUS service_status_;
 	SERVICE_STATUS_HANDLE service_status_handle_;

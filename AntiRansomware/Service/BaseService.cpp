@@ -4,12 +4,46 @@
 BaseService* BaseService::base_service_ = nullptr;
 
 BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description)
-	:name_{ service_name }, display_{ display_name }, description_{ description }, service_status_{ 0 }, service_status_handle_{ 0 }, service_event_{ 0 }, argc_{ 0 }, argv_{ 0 }
+	:name_{ service_name }, display_{ display_name }, description_{ description }, exe_path_{ nullptr }, service_status_{ 0 }, service_status_handle_{ 0 }, service_event_{ 0 }, argc_{ 0 }, argv_{ 0 }
 {
+	_tprintf_s(_T("[ ]\t BaseService\n"));
+
+	TCHAR module_name[MAX_PATH];
+	if (GetModuleFileName(nullptr, module_name, _countof(module_name)) == 0)
+	{
+		PrintErrorMessage(GetLastError(), _T("[!]\t\t GetModuleFileName -> %d, %s"));
+		return;
+	}
+
+	exe_path_ = new TCHAR[MAX_PATH];
+	if (FAILED(StringCchCopy(exe_path_, MAX_PATH, module_name)))
+	{
+		_tprintf_s(_T("[!]\t\t StringCchCopy -> FAILED\n"));
+		return;
+	}
+}
+
+BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description, LPCTSTR exe_path)
+	:name_{ service_name }, display_{ display_name }, description_{ description }, exe_path_{ nullptr }, service_status_{ 0 }, service_status_handle_{ 0 }, service_event_{ 0 }, argc_{ 0 }, argv_{ 0 }
+{
+	size_t length = 0;
+	if (FAILED(StringCchLength(exe_path, MAX_PATH, &length)))
+	{
+		_tprintf_s(_T("[!]\t\t StringCchLength -> FAILED\n"));
+		return;
+	}
+
+	exe_path_ = new TCHAR[MAX_PATH];
+	if (FAILED(StringCchCopy(exe_path_, MAX_PATH, exe_path)))
+	{
+		_tprintf_s(_T("[!]\t\t StringCchCopy -> FAILED\n"));
+		return;
+	}
 }
 
 BaseService::~BaseService()
 {
+	SAFE_DELETE_ARRAY(exe_path_);
 }
 
 void BaseService::Install()
@@ -18,13 +52,6 @@ void BaseService::Install()
 
 	SC_HANDLE manager = nullptr;
 	SC_HANDLE service = nullptr;
-
-	TCHAR module_name[MAX_PATH];
-	if (GetModuleFileName(nullptr, module_name, _countof(module_name)) == 0)
-	{
-		PrintErrorMessage(GetLastError(), _T("[!]\t\t GetModuleFileName -> %d, %s"));
-		return;
-	}
 
 	manager = OpenSCManager(
 		nullptr,
@@ -46,7 +73,7 @@ void BaseService::Install()
 		SERVICE_WIN32_OWN_PROCESS,
 		SERVICE_DEMAND_START,
 		SERVICE_ERROR_NORMAL,
-		module_name,
+		exe_path_,
 		nullptr,
 		nullptr,
 		nullptr,
