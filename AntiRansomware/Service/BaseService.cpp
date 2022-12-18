@@ -15,17 +15,28 @@ BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR des
 		return;
 	}
 
-	exe_path_ = new TCHAR[MAX_PATH];
-	if (FAILED(StringCchCopy(exe_path_, MAX_PATH, module_name)))
-	{
-		_tprintf_s(_T("[!]\t\t StringCchCopy -> FAILED\n"));
-		return;
-	}
+	ExePath(module_name);
 }
 
 BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description, LPCTSTR exe_path)
 	:name_{ service_name }, display_{ display_name }, description_{ description }, exe_path_{ nullptr }, service_status_{ 0 }, service_status_handle_{ 0 }, service_event_{ 0 }, argc_{ 0 }, argv_{ 0 }
 {
+	_tprintf_s(_T("[ ]\t BaseService\n"));
+
+	ExePath(exe_path);
+}
+
+BaseService::~BaseService()
+{
+	_tprintf_s(_T("[ ]\t ~BaseService\n"));
+
+	SAFE_DELETE_ARRAY(exe_path_);
+}
+
+void BaseService::ExePath(LPCTSTR exe_path)
+{
+	_tprintf_s(_T("[ ]\t ExePath"));
+
 	size_t length = 0;
 	if (FAILED(StringCchLength(exe_path, MAX_PATH, &length)))
 	{
@@ -33,17 +44,15 @@ BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR des
 		return;
 	}
 
+	SAFE_DELETE_ARRAY(exe_path_);
 	exe_path_ = new TCHAR[MAX_PATH];
 	if (FAILED(StringCchCopy(exe_path_, MAX_PATH, exe_path)))
 	{
 		_tprintf_s(_T("[!]\t\t StringCchCopy -> FAILED\n"));
 		return;
 	}
-}
 
-BaseService::~BaseService()
-{
-	SAFE_DELETE_ARRAY(exe_path_);
+	_tprintf_s(_T(" -> %s\n"), exe_path_);
 }
 
 void BaseService::Install()
@@ -258,7 +267,7 @@ void BaseService::ServiceMain(DWORD argc, LPTSTR* argv)
 
 	base_service_->service_status_handle_ = RegisterServiceCtrlHandler(
 		base_service_->name_,
-		ServiceControlHandler
+		(LPHANDLER_FUNCTION)ServiceControlHandler
 	);
 
 	if (base_service_->service_status_handle_ == nullptr)

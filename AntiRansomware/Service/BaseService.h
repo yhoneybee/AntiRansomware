@@ -19,6 +19,7 @@ public:
 
 	virtual ~BaseService();
 public:
+	void ExePath(LPCTSTR exe_path);
 	void Install();
 	void Uninstall();
 
