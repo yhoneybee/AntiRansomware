@@ -7,6 +7,14 @@ public:
 		LPCTSTR service_name,
 		LPCTSTR display_name,
 		LPCTSTR description);
+
+	TestService(
+		LPCTSTR service_name,
+		LPCTSTR display_name,
+		LPCTSTR description,
+		LPCTSTR exe_path
+	);
+
 	~TestService();
 public:
 	virtual void OnStart() override;
