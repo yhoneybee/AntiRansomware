@@ -77,8 +77,8 @@ void BaseService::Install(DWORD service_type, DWORD start_type)
 		name_,
 		display_,
 		SERVICE_ALL_ACCESS,
-		SERVICE_WIN32_OWN_PROCESS,
-		SERVICE_DEMAND_START,
+		service_type,
+		start_type,
 		SERVICE_ERROR_NORMAL,
 		exe_path_,
 		nullptr,
@@ -107,6 +107,8 @@ void BaseService::Install(DWORD service_type, DWORD start_type)
 
 	CloseServiceHandle(service);
 	CloseServiceHandle(manager);
+
+	_tprintf_s(_T("[ ]\t\t Installed.\n[ ]\t\t\t name = %s\n"), name_);
 }
 
 void BaseService::Uninstall()
@@ -149,6 +151,8 @@ void BaseService::Uninstall()
 
 	CloseServiceHandle(service);
 	CloseServiceHandle(manager);
+
+	_tprintf_s(_T("[ ]\t\t Uninstalled.\n[ ]\t\t\t name = %s\n"), name_);
 }
 
 void BaseService::Start()

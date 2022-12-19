@@ -10,17 +10,11 @@ public:
 		LPCTSTR description
 	);
 
-	BaseService(
-		LPCTSTR service_name,
-		LPCTSTR display_name,
-		LPCTSTR description,
-		LPCTSTR exe_path
-	);
-
 	virtual ~BaseService();
 public:
+	void ExePath();
 	void ExePath(LPCTSTR exe_path);
-	void Install();
+	void Install(DWORD service_type, DWORD start_type);
 	void Uninstall();
 
 	void Start();
