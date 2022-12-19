@@ -44,12 +44,12 @@ void BaseService::ExePath(LPCTSTR exe_path)
 		return;
 	}
 
-	_tprintf_s(_T(" = %s\n"), exe_path_);
+	_tprintf_s(_T("(%s)\n"), exe_path_);
 }
 
 void BaseService::Install(DWORD service_type, DWORD start_type)
 {
-	_tprintf_s(_T("[ ]\t Install\n"));
+	_tprintf_s(_T("[ ]\t Install(%s)\n"), name_);
 
 	if (exe_path_ == nullptr)
 	{
@@ -108,12 +108,12 @@ void BaseService::Install(DWORD service_type, DWORD start_type)
 	CloseServiceHandle(service);
 	CloseServiceHandle(manager);
 
-	_tprintf_s(_T("[ ]\t\t Installed.\n[ ]\t\t\t name = %s\n"), name_);
+	_tprintf_s(_T("[ ]\t Installed.\n"));
 }
 
 void BaseService::Uninstall()
 {
-	_tprintf_s(_T("[ ]\t Uninstall\n"));
+	_tprintf_s(_T("[ ]\t Uninstall(%s)\n"), name_);
 
 	SC_HANDLE manager = nullptr;
 	SC_HANDLE service = nullptr;
@@ -152,7 +152,7 @@ void BaseService::Uninstall()
 	CloseServiceHandle(service);
 	CloseServiceHandle(manager);
 
-	_tprintf_s(_T("[ ]\t\t Uninstalled.\n[ ]\t\t\t name = %s\n"), name_);
+	_tprintf_s(_T("[ ]\t Uninstalled.\n"));
 }
 
 void BaseService::Start()
