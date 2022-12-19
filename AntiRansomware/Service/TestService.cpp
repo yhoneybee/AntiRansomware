@@ -1,14 +1,10 @@
 #include "stdafx.h"
 #include "TestService.h"
 
-TestService::TestService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description)
-	:BaseService(service_name, display_name, description)
+TestService::TestService()
+	: BaseService(_T("TestService"), _T("TestServiceDisplay"), _T("It is test service."))
 {
-}
-
-TestService::TestService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description, LPCTSTR exe_path)
-	:BaseService(service_name, display_name, description, exe_path)
-{
+	ExePath(_T("C:\\Windows\\System32\\drivers\\begin.sys"));
 }
 
 TestService::~TestService()
