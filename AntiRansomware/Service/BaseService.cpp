@@ -6,8 +6,15 @@ BaseService* BaseService::base_service_ = nullptr;
 BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description)
 	:name_{ service_name }, display_{ display_name }, description_{ description }, exe_path_{ nullptr }, service_status_{ 0 }, service_status_handle_{ 0 }, service_event_{ 0 }, argc_{ 0 }, argv_{ 0 }
 {
-	_tprintf_s(_T("[ ]\t BaseService\n"));
+}
 
+BaseService::~BaseService()
+{
+	SAFE_DELETE_ARRAY(exe_path_);
+}
+
+void BaseService::ExePath()
+{
 	TCHAR module_name[MAX_PATH];
 	if (GetModuleFileName(nullptr, module_name, _countof(module_name)) == 0)
 	{
@@ -16,21 +23,6 @@ BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR des
 	}
 
 	ExePath(module_name);
-}
-
-BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description, LPCTSTR exe_path)
-	:name_{ service_name }, display_{ display_name }, description_{ description }, exe_path_{ nullptr }, service_status_{ 0 }, service_status_handle_{ 0 }, service_event_{ 0 }, argc_{ 0 }, argv_{ 0 }
-{
-	_tprintf_s(_T("[ ]\t BaseService\n"));
-
-	ExePath(exe_path);
-}
-
-BaseService::~BaseService()
-{
-	_tprintf_s(_T("[ ]\t ~BaseService\n"));
-
-	SAFE_DELETE_ARRAY(exe_path_);
 }
 
 void BaseService::ExePath(LPCTSTR exe_path)
@@ -52,12 +44,18 @@ void BaseService::ExePath(LPCTSTR exe_path)
 		return;
 	}
 
-	_tprintf_s(_T(" -> %s\n"), exe_path_);
+	_tprintf_s(_T(" = %s\n"), exe_path_);
 }
 
-void BaseService::Install()
+void BaseService::Install(DWORD service_type, DWORD start_type)
 {
 	_tprintf_s(_T("[ ]\t Install\n"));
+
+	if (exe_path_ == nullptr)
+	{
+		_tprintf_s(_T("[!]\t\t excution file path was null.\n"));
+		return;
+	}
 
 	SC_HANDLE manager = nullptr;
 	SC_HANDLE service = nullptr;
