@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.33027.164
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "begin", "begin\begin.vcxproj", "{4332BC89-9ACD-4210-8F5F-0984398A6E3F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KeyboardFilterDriver", "KeyboardFilterDriver\KeyboardFilterDriver.vcxproj", "{3379A4AC-1B51-4708-800F-E69586DA2753}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -41,6 +43,30 @@ Global
 		{4332BC89-9ACD-4210-8F5F-0984398A6E3F}.Release|x86.ActiveCfg = Release|Win32
 		{4332BC89-9ACD-4210-8F5F-0984398A6E3F}.Release|x86.Build.0 = Release|Win32
 		{4332BC89-9ACD-4210-8F5F-0984398A6E3F}.Release|x86.Deploy.0 = Release|Win32
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|ARM.ActiveCfg = Debug|ARM
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|ARM.Build.0 = Debug|ARM
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|ARM.Deploy.0 = Debug|ARM
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|ARM64.Build.0 = Debug|ARM64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|x64.ActiveCfg = Debug|x64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|x64.Build.0 = Debug|x64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|x64.Deploy.0 = Debug|x64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|x86.ActiveCfg = Debug|Win32
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|x86.Build.0 = Debug|Win32
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Debug|x86.Deploy.0 = Debug|Win32
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|ARM.ActiveCfg = Release|ARM
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|ARM.Build.0 = Release|ARM
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|ARM.Deploy.0 = Release|ARM
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|ARM64.ActiveCfg = Release|ARM64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|ARM64.Build.0 = Release|ARM64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|ARM64.Deploy.0 = Release|ARM64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|x64.ActiveCfg = Release|x64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|x64.Build.0 = Release|x64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|x64.Deploy.0 = Release|x64
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|x86.ActiveCfg = Release|Win32
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|x86.Build.0 = Release|Win32
+		{3379A4AC-1B51-4708-800F-E69586DA2753}.Release|x86.Deploy.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
