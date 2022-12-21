@@ -1,12 +1,24 @@
 #include "stdafx.h"
 
 PDEVICE_OBJECT keyboard_device = nullptr;
+ULONG pending_key = 0;
 
 VOID Unload(PDRIVER_OBJECT driver)
 {
+	LARGE_INTEGER interval = { 0 };
 	PDEVICE_OBJECT device = driver->DeviceObject;
+
+	interval.QuadPart = TIME_SECONDS(1);
+
 	IoDetachDevice(((PDEVICE_EXTENSION)device->DeviceExtension)->lower_keyboard_device);
-	IoDetachDevice(keyboard_device);
+
+	while (pending_key)
+	{
+		KdPrint(("[ KFD ]\t remain pending key(%lu)\r\n"), pending_key);
+		KeDelayExecutionThread(KernelMode, false, &interval);
+	}
+
+	IoDeleteDevice(keyboard_device);
 	KdPrint(("[ KFD ]\t unload was successful\r\n"));
 }
 
@@ -40,14 +52,47 @@ NTSTATUS DispatchPassThrough(PDEVICE_OBJECT device, PIRP irp)
 {
 	NTSTATUS status = STATUS_SUCCESS;
 
+	IoCopyCurrentIrpStackLocationToNext(irp);
+
+	status = IoCallDriver(((PDEVICE_EXTENSION)device->DeviceExtension)->lower_keyboard_device, irp);
+
 	return status;
+}
+
+NTSTATUS ReadComplete(PDEVICE_OBJECT device, PIRP irp, PVOID context)
+{
+	LPTSTR key_flag[4] = { "keydown", "keyup", "E0", "E1" };
+	PKEYBOARD_INPUT_DATA key = (PKEYBOARD_INPUT_DATA)irp->AssociatedIrp.SystemBuffer;
+
+	int struct_num = irp->IoStatus.Information / sizeof(KEYBOARD_INPUT_DATA);
+
+	if (NT_SUCCESS(irp->IoStatus.Status))
+	{
+		for (int i = 0; i < struct_num; i++)
+		{
+			KdPrint(("the scan code was %x (%s)\n", key[i].MakeCode, key_flag[key->Flags]));
+		}
+	}
+
+	if (irp->PendingReturned)
+	{
+		IoMarkIrpPending(irp);
+	}
+
+	pending_key--;
+
+	return irp->IoStatus.Status;
 }
 
 NTSTATUS DispatchRead(PDEVICE_OBJECT device, PIRP irp)
 {
-	NTSTATUS status = STATUS_SUCCESS;
+	IoCopyCurrentIrpStackLocationToNext(irp);
 
-	return status;
+	IoSetCompletionRoutine(irp, ReadComplete, nullptr, true, true, true);
+
+	pending_key++;
+
+	return IoCallDriver(((PDEVICE_EXTENSION)device->DeviceExtension)->lower_keyboard_device, irp);
 }
 
 EXTERN_C NTSTATUS DriverEntry(PDRIVER_OBJECT driver, PUNICODE_STRING registry_path)
