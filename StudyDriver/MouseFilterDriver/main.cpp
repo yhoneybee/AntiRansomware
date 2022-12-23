@@ -10,7 +10,7 @@ VOID Unload(PDRIVER_OBJECT driver)
 
 	interval.QuadPart = TIME_SECONDS(1);
 
-	IoDetachDevice(((PDEVICE_EXTENSION)device->DeviceExtension)->lower_keyboard_device);
+	IoDetachDevice(((PDEVICE_EXTENSION)device->DeviceExtension)->lower_device);
 
 	while (pending_key)
 	{
@@ -25,9 +25,9 @@ VOID Unload(PDRIVER_OBJECT driver)
 NTSTATUS AttachDevice(PDRIVER_OBJECT driver)
 {
 	NTSTATUS status = STATUS_SUCCESS;
-	UNICODE_STRING target_device = RTL_CONSTANT_STRING(L"\\Device\\KeyboardClass0");
+	UNICODE_STRING target_device = RTL_CONSTANT_STRING(L"\\Device\\PointerClass0");
 
-	status = IoCreateDevice(driver, sizeof(DEVICE_EXTENSION), nullptr, FILE_DEVICE_KEYBOARD, 0, false, &mouse_device);
+	status = IoCreateDevice(driver, sizeof(DEVICE_EXTENSION), nullptr, FILE_DEVICE_MOUSE, 0, false, &mouse_device);
 	if (!NT_SUCCESS(status))
 	{
 		return status;
@@ -38,7 +38,7 @@ NTSTATUS AttachDevice(PDRIVER_OBJECT driver)
 
 	RtlZeroMemory(mouse_device->DeviceExtension, sizeof(DEVICE_EXTENSION));
 
-	status = IoAttachDevice(mouse_device, &target_device, &((PDEVICE_EXTENSION)(mouse_device->DeviceExtension))->lower_keyboard_device);
+	status = IoAttachDevice(mouse_device, &target_device, &((PDEVICE_EXTENSION)(mouse_device->DeviceExtension))->lower_device);
 	if (!NT_SUCCESS(status))
 	{
 		IoDeleteDevice(mouse_device);
@@ -54,23 +54,22 @@ NTSTATUS DispatchPassThrough(PDEVICE_OBJECT device, PIRP irp)
 
 	IoCopyCurrentIrpStackLocationToNext(irp);
 
-	status = IoCallDriver(((PDEVICE_EXTENSION)device->DeviceExtension)->lower_keyboard_device, irp);
+	status = IoCallDriver(((PDEVICE_EXTENSION)device->DeviceExtension)->lower_device, irp);
 
 	return status;
 }
 
 NTSTATUS ReadComplete(PDEVICE_OBJECT device, PIRP irp, PVOID context)
 {
-	LPTSTR key_flag[4] = { "keydown", "keyup", "E0", "E1" };
-	PKEYBOARD_INPUT_DATA key = (PKEYBOARD_INPUT_DATA)irp->AssociatedIrp.SystemBuffer;
+	PMOUSE_INPUT_DATA key = (PMOUSE_INPUT_DATA)irp->AssociatedIrp.SystemBuffer;
 
-	int struct_num = irp->IoStatus.Information / sizeof(KEYBOARD_INPUT_DATA);
+	int loop_count = irp->IoStatus.Information / sizeof(MOUSE_INPUT_DATA);
 
 	if (NT_SUCCESS(irp->IoStatus.Status))
 	{
-		for (int i = 0; i < struct_num; i++)
+		for (int i = 0; i < loop_count; i++)
 		{
-			KdPrint(("the scan code was %x (%s)\n", key[i].MakeCode, key_flag[key->Flags]));
+			KdPrint(("[ MFD ]\t the button state was %x\n", key->ButtonFlags));
 		}
 	}
 
@@ -92,7 +91,7 @@ NTSTATUS DispatchRead(PDEVICE_OBJECT device, PIRP irp)
 
 	pending_key++;
 
-	return IoCallDriver(((PDEVICE_EXTENSION)device->DeviceExtension)->lower_keyboard_device, irp);
+	return IoCallDriver(((PDEVICE_EXTENSION)device->DeviceExtension)->lower_device, irp);
 }
 
 EXTERN_C NTSTATUS DriverEntry(PDRIVER_OBJECT driver, PUNICODE_STRING registry_path)
@@ -108,17 +107,17 @@ EXTERN_C NTSTATUS DriverEntry(PDRIVER_OBJECT driver, PUNICODE_STRING registry_pa
 
 	driver->MajorFunction[IRP_MJ_READ] = DispatchRead;
 
-	KdPrint(("[ KFD ]\t load was successful\r\n"));
+	KdPrint(("[ MFD ]\t load was successful\r\n"));
 
 	status = AttachDevice(driver);
 	if (!NT_SUCCESS(status))
 	{
-		KdPrint(("[ KFD ]\t attach device was failed\r\n"));
+		KdPrint(("[ MFD ]\t attach device was failed\r\n"));
 		return status;
 	}
 	else
 	{
-		KdPrint(("[ KFD ]\t attach device was successful\r\n"));
+		KdPrint(("[ MFD ]\t attach device was successful\r\n"));
 	}
 
 	return status;
