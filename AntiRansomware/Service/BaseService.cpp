@@ -4,16 +4,16 @@
 BaseService* BaseService::base_service_ = nullptr;
 
 BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description)
-	:name_{ service_name }, display_{ display_name }, description_{ description }, exe_path_{ nullptr }, service_status_{ 0 }, service_status_handle_{ 0 }, service_event_{ 0 }, argc_{ 0 }, argv_{ 0 }
+	:name_{ service_name }, display_{ display_name }, description_{ description }, sys_path_{ nullptr }, service_status_{ 0 }, service_status_handle_{ 0 }, service_event_{ 0 }, argc_{ 0 }, argv_{ 0 }
 {
 }
 
 BaseService::~BaseService()
 {
-	SAFE_DELETE_ARRAY(exe_path_);
+	SAFE_DELETE_ARRAY(sys_path_);
 }
 
-void BaseService::ExePath()
+void BaseService::SYSPath()
 {
 	TCHAR module_name[MAX_PATH];
 	if (GetModuleFileName(nullptr, module_name, _countof(module_name)) == 0)
@@ -22,36 +22,66 @@ void BaseService::ExePath()
 		return;
 	}
 
-	ExePath(module_name);
+	SYSPath(module_name);
 }
 
-void BaseService::ExePath(LPCTSTR exe_path)
+void BaseService::SYSPath(LPCTSTR sys_path)
 {
-	_tprintf_s(_T("[ ]\t ExePath"));
+	_tprintf_s(_T("[ ]\t SYSPath"));
 
 	size_t length = 0;
-	if (FAILED(StringCchLength(exe_path, MAX_PATH, &length)))
+	if (FAILED(StringCchLength(sys_path, MAX_PATH, &length)))
 	{
 		_tprintf_s(_T("[!]\t\t StringCchLength -> FAILED\n"));
 		return;
 	}
 
-	SAFE_DELETE_ARRAY(exe_path_);
-	exe_path_ = new TCHAR[MAX_PATH];
-	if (FAILED(StringCchCopy(exe_path_, MAX_PATH, exe_path)))
+	SAFE_DELETE_ARRAY(sys_path_);
+	sys_path_ = new TCHAR[MAX_PATH];
+	if (FAILED(StringCchCopy(sys_path_, MAX_PATH, sys_path)))
 	{
 		_tprintf_s(_T("[!]\t\t StringCchCopy -> FAILED\n"));
 		return;
 	}
 
-	_tprintf_s(_T("(%s)\n"), exe_path_);
+	_tprintf_s(_T("(%s)\n"), sys_path_);
 }
 
-void BaseService::Install(DWORD service_type, DWORD start_type)
+void BaseService::INFPath()
 {
-	_tprintf_s(_T("[ ]\t Install(%s)\n"), name_);
+	_tprintf_s(_T("[ ]\t INFPath"));
 
-	if (exe_path_ == nullptr)
+	TCHAR dest[MAX_PATH] = { 0, };
+
+	if (FAILED(StringCchPrintf(dest, MAX_PATH, _T("C:\\Windows\\INF\\%ws.inf"), name_)))
+	{
+		_tprintf_s(_T("[!]\t\t StringCchPrintf -> FAILED\n"));
+		return;
+	}
+
+	INFPath(dest);
+}
+
+void BaseService::INFPath(LPCTSTR inf_path)
+{
+	_tprintf_s(_T("[ ]\t INFPath(LPCTSTR)"));
+
+	SAFE_DELETE_ARRAY(inf_path_);
+	inf_path_ = new TCHAR[MAX_PATH];
+	if (FAILED(StringCchCopy(inf_path_, MAX_PATH, inf_path)))
+	{
+		_tprintf_s(_T("[!]\t\t StringCchCopy -> FAILED\n"));
+		return;
+	}
+
+	_tprintf_s(_T("(%s)\n"), inf_path_);
+}
+
+void BaseService::InstallFromSYS(DWORD service_type, DWORD start_type)
+{
+	_tprintf_s(_T("[ ]\t InstallSYS(%s, )\n"), name_);
+
+	if (sys_path_ == nullptr)
 	{
 		_tprintf_s(_T("[!]\t\t excution file path was null.\n"));
 		return;
@@ -80,7 +110,7 @@ void BaseService::Install(DWORD service_type, DWORD start_type)
 		service_type,
 		start_type,
 		SERVICE_ERROR_NORMAL,
-		exe_path_,
+		sys_path_,
 		nullptr,
 		nullptr,
 		nullptr,
@@ -109,6 +139,21 @@ void BaseService::Install(DWORD service_type, DWORD start_type)
 	CloseServiceHandle(manager);
 
 	_tprintf_s(_T("[ ]\t Installed.\n"));
+}
+
+void BaseService::InstallFromINF()
+{
+	_tprintf_s(_T("[ ]\t InstallINF(%s)\n"), name_);
+
+	TCHAR dest[MAX_PATH] = { 0, };
+
+	if (FAILED(StringCchPrintf(dest, MAX_PATH, _T("DefaultInstall 132 %ws"), inf_path_)))
+	{
+		_tprintf_s(_T("[!]\t\t StringCchPrintf -> FAILED\n"));
+		return;
+	}
+
+	InstallHinfSection(nullptr, nullptr, dest, 0);
 }
 
 void BaseService::Uninstall()
@@ -157,6 +202,14 @@ void BaseService::Uninstall()
 
 void BaseService::Start()
 {
+}
+
+void BaseService::Stop()
+{
+}
+
+void BaseService::ServiceStart()
+{
 	_tprintf_s(_T("[ ]\t Start\n"));
 
 	ServiceReportStatus(SERVICE_START_PENDING, NO_ERROR, 3000);
@@ -166,7 +219,7 @@ void BaseService::Start()
 	ServiceReportStatus(SERVICE_RUNNING, NO_ERROR, 0);
 }
 
-void BaseService::Pause()
+void BaseService::ServicePause()
 {
 	_tprintf_s(_T("[ ]\t Pause\n"));
 
@@ -177,7 +230,7 @@ void BaseService::Pause()
 	ServiceReportStatus(SERVICE_PAUSED, NO_ERROR, 0);
 }
 
-void BaseService::Continue()
+void BaseService::ServiceContinue()
 {
 	_tprintf_s(_T("[ ]\t Continue\n"));
 
@@ -188,7 +241,7 @@ void BaseService::Continue()
 	ServiceReportStatus(SERVICE_RUNNING, NO_ERROR, 0);
 }
 
-void BaseService::Stop()
+void BaseService::ServiceStop()
 {
 	_tprintf_s(_T("[ ]\t Stop\n"));
 
@@ -199,7 +252,7 @@ void BaseService::Stop()
 	ServiceReportStatus(SERVICE_STOPPED, NO_ERROR, 0);
 }
 
-void BaseService::Shutdown()
+void BaseService::ServiceShutdown()
 {
 	_tprintf_s(_T("[ ]\t Shutdown\n"));
 
@@ -281,7 +334,7 @@ void BaseService::ServiceMain(DWORD argc, LPTSTR* argv)
 	base_service_->argc_ = argc;
 	base_service_->argv_ = argv;
 
-	base_service_->Start();
+	base_service_->ServiceStart();
 }
 
 void BaseService::ServiceControlHandler(DWORD control)
@@ -291,16 +344,16 @@ void BaseService::ServiceControlHandler(DWORD control)
 	switch (control)
 	{
 	case SERVICE_CONTROL_PAUSE:
-		base_service_->Pause();
+		base_service_->ServicePause();
 		break;
 	case SERVICE_CONTROL_CONTINUE:
-		base_service_->Continue();
+		base_service_->ServiceContinue();
 		break;
 	case SERVICE_CONTROL_STOP:
-		base_service_->Stop();
+		base_service_->ServiceStop();
 		break;
 	case SERVICE_CONTROL_SHUTDOWN:
-		base_service_->Shutdown();
+		base_service_->ServiceShutdown();
 		break;
 	}
 }

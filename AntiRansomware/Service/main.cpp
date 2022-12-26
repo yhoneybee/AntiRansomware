@@ -18,9 +18,13 @@ int main(DWORD argc, LPTSTR* argv)
 	}
 	else if (argc == 2)
 	{
-		if (lstrcmpi(argv[1], _T("-i")) == false)
+		if (lstrcmpi(argv[1], _T("-si")) == false)
 		{
-			test_service.Install(SERVICE_KERNEL_DRIVER, SERVICE_BOOT_START);
+			test_service.InstallFromSYS(SERVICE_FILE_SYSTEM_DRIVER, SERVICE_BOOT_START);
+		}
+		if (lstrcmpi(argv[1], _T("-ii")) == false)
+		{
+			test_service.InstallFromINF();
 		}
 		else if (lstrcmpi(argv[1], _T("-u")) == false)
 		{

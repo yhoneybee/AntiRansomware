@@ -13,6 +13,8 @@
 #include <tchar.h>
 #include <strsafe.h>
 #include <stdarg.h>
+#include <setupapi.h>
+#pragma comment(lib, "Setupapi.lib")
 
 //	alias
 //		typedef

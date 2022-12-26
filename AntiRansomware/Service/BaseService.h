@@ -11,18 +11,23 @@ public:
 	);
 
 	virtual ~BaseService();
+protected:
+	void SYSPath();
+	void SYSPath(LPCTSTR sys_path);
+	void INFPath();
+	void INFPath(LPCTSTR inf_path);
 public:
-	void ExePath();
-	void ExePath(LPCTSTR exe_path);
-	void Install(DWORD service_type, DWORD start_type);
+	void InstallFromSYS(DWORD service_type, DWORD start_type);
+	void InstallFromINF();
 	void Uninstall();
-
 	void Start();
-	void Pause();
-	void Continue();
 	void Stop();
-	void Shutdown();
 private:
+	void ServiceStart();
+	void ServicePause();
+	void ServiceContinue();
+	void ServiceStop();
+	void ServiceShutdown();
 	void ServiceReportStatus(DWORD current_status, DWORD win32_exit_code, DWORD wait_hint);
 public:
 	static bool RunServiceMain(BaseService* service);
@@ -44,7 +49,8 @@ private:
 	LPCTSTR name_;
 	LPCTSTR display_;
 	LPCTSTR description_;
-	LPTSTR exe_path_;
+	LPTSTR sys_path_;
+	LPTSTR inf_path_;
 
 	SERVICE_STATUS service_status_;
 	SERVICE_STATUS_HANDLE service_status_handle_;
