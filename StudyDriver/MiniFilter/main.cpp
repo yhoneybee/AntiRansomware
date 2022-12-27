@@ -1,26 +1,28 @@
 #include "stdafx.h"
 
-PFLT_FILTER filter = nullptr;
+NTSTATUS
+MiniFltUnload(FLT_FILTER_UNLOAD_FLAGS flags);
+FLT_PREOP_CALLBACK_STATUS
+PrevCreate(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS flt_obj, PVOID* completion_context);
+FLT_POSTOP_CALLBACK_STATUS
+PostCreate(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS flt_obj, PVOID completion_context, FLT_POST_OPERATION_FLAGS flags);
 
-NTSTATUS MFUnload(FLT_FILTER_UNLOAD_FLAGS flags);
-FLT_PREOP_CALLBACK_STATUS MFPreCreate(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS filter_objs, PVOID* completion_context);
-FLT_POSTOP_CALLBACK_STATUS MFPostCreate(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS filter_objs, PVOID completion_context, FLT_POST_OPERATION_FLAGS flags);
-FLT_PREOP_CALLBACK_STATUS MFPreWrite(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS filter_objs, PVOID* completion_context);
+PFLT_FILTER flt_handle;
 
-const FLT_OPERATION_REGISTRATION callbacks[] =
+FLT_OPERATION_REGISTRATION operations[] =
 {
-	{IRP_MJ_CREATE, 0, MFPreCreate, MFPostCreate},
-	{IRP_MJ_OPERATION_END}
+	{ IRP_MJ_CREATE, 0, PrevCreate, PostCreate, nullptr },
+	{ IRP_MJ_OPERATION_END },
 };
 
-const FLT_REGISTRATION filter_registration =
+FLT_REGISTRATION registration =
 {
-	sizeof(FLT_REGISTRATION),
+	sizeof(registration),
 	FLT_REGISTRATION_VERSION,
 	0,
 	nullptr,
-	callbacks,
-	MFUnload,
+	operations,
+	MiniFltUnload,
 	nullptr,
 	nullptr,
 	nullptr,
@@ -33,66 +35,94 @@ const FLT_REGISTRATION filter_registration =
 	nullptr
 };
 
-NTSTATUS MFUnload(FLT_FILTER_UNLOAD_FLAGS flags)
+NTSTATUS
+MiniFltUnload(FLT_FILTER_UNLOAD_FLAGS flags)
 {
-	FltUnregisterFilter(filter);
+	if (flt_handle)
+	{
+		FltUnregisterFilter(flt_handle);
+	}
 
-	KdPrint(("[ MF ]\t minifilter unload successful\r\n"));
+	KdPrint(("[ mini filter ]\t unload successful\r\n"));
 
 	return STATUS_SUCCESS;
 }
 
-FLT_PREOP_CALLBACK_STATUS MFPreCreate(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS filter_objs, PVOID* completion_context)
+FLT_PREOP_CALLBACK_STATUS
+PrevCreate(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS flt_obj, PVOID* completion_context)
 {
-	KdPrint(("[ MF ]\t MFPreCreate\r\n"));
-
 	NTSTATUS status = STATUS_SUCCESS;
+	PFLT_FILE_NAME_INFORMATION file_name_info = nullptr;
 
-	WCHAR name[260] = { 0, };
-
-	PFLT_FILE_NAME_INFORMATION file_name_info;
 	status = FltGetFileNameInformation(data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &file_name_info);
-	if (NT_SUCCESS(status))
+	if (!NT_SUCCESS(status))
 	{
-		status = FltParseFileNameInformation(file_name_info);
-		if (NT_SUCCESS(status))
-		{
-			if (file_name_info->Name.MaximumLength < 260)
-			{
-				RtlCopyMemory(name, file_name_info->Name.Buffer, file_name_info->Name.MaximumLength);
-				KdPrint(("[ MF ]\t create file: %ws\r\n"), name);
-			}
-		}
-
-		FltReleaseFileNameInformation(file_name_info);
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
-	return FLT_PREOP_SUCCESS_WITH_CALLBACK;
+	status = FltParseFileNameInformation(file_name_info);
+	if (!NT_SUCCESS(status))
+	{
+		FltReleaseFileNameInformation(file_name_info);
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
+
+	if (file_name_info->Name.MaximumLength >= 260)
+	{
+		FltReleaseFileNameInformation(file_name_info);
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
+
+	WCHAR name[260] = { 0, };
+	RtlCopyMemory(name, file_name_info->Name.Buffer, file_name_info->Name.MaximumLength);
+	_wcsupr(name);
+	if (wcsstr(name, L".TXT") == nullptr)
+	{
+		FltReleaseFileNameInformation(file_name_info);
+		return FLT_PREOP_SUCCESS_WITH_CALLBACK;
+	}
+
+	data->IoStatus.Status = STATUS_ACCESS_DENIED;
+	FltReleaseFileNameInformation(file_name_info);
+	return FLT_PREOP_COMPLETE;
 }
 
-FLT_POSTOP_CALLBACK_STATUS MFPostCreate(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS filter_objs, PVOID completion_context, FLT_POST_OPERATION_FLAGS flags)
+FLT_POSTOP_CALLBACK_STATUS
+PostCreate(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS flt_obj, PVOID completion_context, FLT_POST_OPERATION_FLAGS flags)
 {
-	KdPrint(("[ MF ]\t pos create is running\r\n"));
+	//KdPrint(("[ mini filter ]\t " __FUNCTION__ "\t%u -> (%wZ)\r\n"), PtrToUint(PsGetCurrentProcessId()), &file_name_info->FinalComponent);
 
 	return FLT_POSTOP_FINISHED_PROCESSING;
 }
 
-EXTERN_C NTSTATUS DriverEntry(PDRIVER_OBJECT driver_obj, PUNICODE_STRING registry_path)
+VOID
+DriverUnload(PDRIVER_OBJECT driver_obj)
+{
+	KdPrint(("[ driver ]\t unload successful\r\n"));
+}
+
+EXTERN_C NTSTATUS
+DriverEntry(PDRIVER_OBJECT driver_obj, PUNICODE_STRING registry_path)
 {
 	NTSTATUS status = STATUS_SUCCESS;
 
-	status = FltRegisterFilter(driver_obj, &filter_registration, &filter);
+	driver_obj->DriverUnload = DriverUnload;
+
+	status = FltRegisterFilter(driver_obj, &registration, &flt_handle);
 	if (!NT_SUCCESS(status))
 	{
 		return status;
 	}
 
-	status = FltStartFiltering(filter);
+	status = FltStartFiltering(flt_handle);
 	if (!NT_SUCCESS(status))
 	{
-		FltUnregisterFilter(filter);
+		FltUnregisterFilter(flt_handle);
 		return status;
 	}
 
-	KdPrint(("[ MF ]\t minifilter load successful\r\n"));
+	KdPrint(("[ driver ]\t load successful\r\n"));
+	KdPrint(("[ mini filter ]\t load successful\r\n"));
+
+	return status;
 }

@@ -47,7 +47,7 @@ DelService = %ServiceName%,0x200      ;Ensure service is stopped before deleting
 DisplayName      = %ServiceName%
 Description      = %ServiceDescription%
 ServiceBinary    = %12%\%DriverName%.sys        ;%windir%\system32\drivers\
-Dependencies     = FltMgr
+Dependencies     = "FltMgr"
 ServiceType      = 2                            ;SERVICE_FILE_SYSTEM_DRIVER
 StartType        = 3                            ;SERVICE_DEMAND_START
 ErrorControl     = 1                            ;SERVICE_ERROR_NORMAL
@@ -59,14 +59,9 @@ AddReg           = MiniFilter.AddRegistry
 ;
 
 [MiniFilter.AddRegistry]
-HKR,,"SupportedFeatures",0x00010001,0x3
 HKR,"Instances","DefaultInstance",0x00000000,%DefaultInstance%
 HKR,"Instances\"%Instance1.Name%,"Altitude",0x00000000,%Instance1.Altitude%
 HKR,"Instances\"%Instance1.Name%,"Flags",0x00010001,%Instance1.Flags%
-HKR,"Instances\"%Instance2.Name%,"Altitude",0x00000000,%Instance2.Altitude%
-HKR,"Instances\"%Instance2.Name%,"Flags",0x00010001,%Instance2.Flags%
-HKR,"Instances\"%Instance3.Name%,"Altitude",0x00000000,%Instance3.Altitude%
-HKR,"Instances\"%Instance3.Name%,"Flags",0x00010001,%Instance3.Flags%
 
 ;
 ; Copy Files
@@ -77,7 +72,6 @@ HKR,"Instances\"%Instance3.Name%,"Flags",0x00010001,%Instance3.Flags%
 
 [SourceDisksFiles]
 MiniFilter.sys = 1,,
-MiniFilter.exe = 1,,
 
 [SourceDisksNames]
 1 = %DiskId1%,,,
@@ -87,20 +81,14 @@ MiniFilter.exe = 1,,
 ;;
 
 [Strings]
-ProviderString          = "TODO-Set-Provider"
-ServiceDescription      = "MiniFilter mini-filter driver"
+ProviderString          = "yhoney"
+ServiceDescription      = "mini-filter driver"
 ServiceName             = "TestService"
 DriverName              = "MiniFilter"
 DiskId1                 = "MiniFilter Device Installation Disk"
 
 ;Instances specific information.
-DefaultInstance         = "MiniFilter - Top Instance"
-Instance1.Name          = "MiniFilter - Middle Instance"
+DefaultInstance         = "MiniFilter-Example"
+Instance1.Name          = "MiniFilter-Example"
 Instance1.Altitude      = "370000"
-Instance1.Flags         = 0x1          ; Suppress automatic attachments
-Instance2.Name          = "MiniFilter - Bottom Instance"
-Instance2.Altitude      = "361000"
-Instance2.Flags         = 0x1          ; Suppress automatic attachments
-Instance3.Name          = "MiniFilter - Top Instance"
-Instance3.Altitude      = "385100"
-Instance3.Flags         = 0x1          ; Suppress automatic attachments
+Instance1.Flags         = 0x0
