@@ -4,21 +4,21 @@ Class       = "ActivityMonitor"
 ClassGuid   = {b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}
 Provider    = %ProviderName%
 DriverVer   = 
-CatalogFile = MiniFilter.cat
+CatalogFile = AntRan.cat
 
 [DestinationDirs]
 DefaultDestDir			= 12
-MiniFilter.DriverFiles	= 12
-;MiniFilter.UserFiles	= 10,FltMgr
+AntRan.DriverFiles	= 12
+;AntRan.UserFiles	= 10,FltMgr
 
 [DefaultInstall.NTamd64]
 OptionDesc	= %ServiceDescription%
-CopyFiles	= MiniFilter.DriverFiles;, MiniFilter.UserFiles
+CopyFiles	= AntRan.DriverFiles;, AntRan.UserFiles
 
 [DefaultInstall.NTamd64.Services]
-AddService = %ServiceName%,,MiniFilter.Service
+AddService = %ServiceName%,,AntRan.Service
 
-[MiniFilter.Service]
+[AntRan.Service]
 DisplayName    = %ServiceName%
 Description    = %ServiceDescription%
 ServiceBinary  = %12%\%DriverName%.sys
@@ -26,10 +26,10 @@ ServiceType    = 2 ;    SERVICE_FILE_SYSTEM_DRIVER
 StartType      = 3 ;    SERVICE_DEMAND_START
 ErrorControl   = 1 ;    SERVICE_ERROR_NORMAL%
 LoadOrderGroup = "FSFilter Activity Monitor"
-AddReg         = MiniFilter.AddRegistry
+AddReg         = AntRan.AddRegistry
 Dependencies   = FltMgr
 
-[MiniFilter.DriverFiles]
+[AntRan.DriverFiles]
 %DriverName%.sys
 
 [SourceDisksFiles]
@@ -38,9 +38,9 @@ AntRan.sys = 1,,
 [SourceDisksNames]
 1 = %DiskId1%,,,
 
-;[MiniFilter.UserFiles]
+;[AntRan.UserFiles]
 
-[MiniFilter.AddRegistry]
+[AntRan.AddRegistry]
 HKR,%RegInstancesSubkeyName%,%RegDefaultInstanceValueName%,0x00000000,%DefaultInstance%
 HKR,%RegInstancesSubkeyName%"\"%Instance1.Name%,%RegAltitudeValueName%,0x00000000,%Instance1.Altitude%
 HKR,%RegInstancesSubkeyName%"\"%Instance1.Name%,%RegFlagsValueName%,0x00010001,%Instance1.Flags%
@@ -57,7 +57,7 @@ RegDefaultInstanceValueName = "DefaultInstance"
 RegAltitudeValueName		= "Altitude"
 RegFlagsValueName			= "Flags"
 
-DefaultInstance				= "MiniFilter-Main-Instance"
-Instance1.Name				= "MiniFilter-Main-Instance"
+DefaultInstance				= "AntRan-Main-Instance"
+Instance1.Name				= "AntRan-Main-Instance"
 Instance1.Altitude			= "370000"
 Instance1.Flags				= 0x0

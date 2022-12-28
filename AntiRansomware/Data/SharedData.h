@@ -1,13 +1,12 @@
 #pragma once
-#include <tchar.h>
+#include "pch.h"
 
-const WCHAR* PORT_NAME_W = L"AntRanPORT";
-const CHAR* PORT_NAME_A = "AntRanPORT";
+const wchar_t* PORT_NAME_W = L"AntRanPORT";
+const char* PORT_NAME_A = "AntRanPORT";
 
-constexpr int BUF_SIZE = 4096 / sizeof(WCHAR);
+constexpr int BUF_SIZE = 4096 / sizeof(wchar_t);
 
-typedef struct
+typedef struct NAME_EXPORT
 {
-	WCHAR data[BUF_SIZE];
-	INT length;
+	wchar_t data[BUF_SIZE];
 } Message, *PMessage;

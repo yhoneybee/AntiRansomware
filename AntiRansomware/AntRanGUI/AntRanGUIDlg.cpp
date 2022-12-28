@@ -65,6 +65,8 @@ BEGIN_MESSAGE_MAP(CAntRanGUIDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDOK, &CAntRanGUIDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDCANCEL, &CAntRanGUIDlg::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -159,5 +161,23 @@ LRESULT CAntRanGUIDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// TODO: Add your specialized code here and/or call the base class
 
+
+
 	return CDialogEx::WindowProc(message, wParam, lParam);
 }
+
+
+void CAntRanGUIDlg::OnBnClickedOk()
+{
+	// TODO: Add your control notification handler code here
+	CDialogEx::OnOK();
+}
+
+
+void CAntRanGUIDlg::OnBnClickedCancel()
+{
+	// TODO: Add your control notification handler code here
+	CDialogEx::OnCancel();
+}
+
+

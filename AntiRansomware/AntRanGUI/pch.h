@@ -10,4 +10,8 @@
 // add headers that you want to pre-compile here
 #include "framework.h"
 
+#include <fltUser.h>
+
+#define MY_LOG(format) OutputDebugStringA("[ AntRan GUI ] " __FUNCTION__ ": " format "\r\n");
+
 #endif //PCH_H
