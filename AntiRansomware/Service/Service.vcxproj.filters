@@ -15,6 +15,9 @@
     <Filter Include="stdafx">
       <UniqueIdentifier>{178ad013-15a1-46e2-bbfd-d2c303f97568}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AntRanService">
+      <UniqueIdentifier>{105c1a92-6b7f-4869-bcfd-44123f9ea3e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseService.h">
@@ -23,7 +26,9 @@
     <ClInclude Include="stdafx.h">
       <Filter>stdafx</Filter>
     </ClInclude>
-    <ClInclude Include="AntRanService.h" />
+    <ClInclude Include="AntRanService.h">
+      <Filter>AntRanService</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -36,7 +41,7 @@
       <Filter>BaseService</Filter>
     </ClCompile>
     <ClCompile Include="AntRanService.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>AntRanService</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

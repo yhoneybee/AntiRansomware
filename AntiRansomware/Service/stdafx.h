@@ -3,7 +3,7 @@
 // macro
 #define SAFE_DELETE(p) { if(p != nullptr) { delete p; p = nullptr; } }
 #define SAFE_DELETE_ARRAY(p) { if(p != nullptr) { delete[] p; p = nullptr; } }
-#ifdef EXPORTABLE
+#ifdef EXPORTABLE_SERVICE
 #define NAME_EXPORT __declspec(dllexport)
 #else
 #define NAME_EXPORT __declspec(dllimport)
