@@ -1,12 +1,13 @@
 #pragma once
 #include "BaseService.h"
-class TestService : public BaseService
+
+class NAME_EXPORT AntRanService : public BaseService
 {
 public:
-	TestService();
-
-	~TestService();
-public:
+	AntRanService();
+	~AntRanService();
+private:
+	// Inherited via BaseService
 	virtual void OnStart() override;
 	virtual void OnPause() override;
 	virtual void OnContinue() override;

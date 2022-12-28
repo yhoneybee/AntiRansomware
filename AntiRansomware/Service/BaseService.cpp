@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "BaseService.h"
 
-BaseService* BaseService::base_service_ = nullptr;
+ BaseService* BaseService::base_service_ = nullptr;
 
 BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description)
 	:name_{ service_name }, display_{ display_name }, description_{ description }, sys_path_{ nullptr }, service_status_{ 0 }, service_status_handle_{ 0 }, service_event_{ 0 }, argc_{ 0 }, argv_{ 0 }
@@ -49,22 +49,12 @@ void BaseService::SYSPath(LPCTSTR sys_path)
 
 void BaseService::INFPath()
 {
-	_tprintf_s(_T("[ ]\t INFPath"));
-
-	TCHAR dest[MAX_PATH] = { 0, };
-
-	if (FAILED(StringCchPrintf(dest, MAX_PATH, _T("C:\\Windows\\INF\\%ws.inf"), name_)))
-	{
-		_tprintf_s(_T("[!]\t\t StringCchPrintf -> FAILED\n"));
-		return;
-	}
-
-	INFPath(dest);
+	INFPath(name_);
 }
 
 void BaseService::INFPath(LPCTSTR inf_path)
 {
-	_tprintf_s(_T("[ ]\t INFPath(LPCTSTR)"));
+	_tprintf_s(_T("[ ]\t INFPath"));
 
 	SAFE_DELETE_ARRAY(inf_path_);
 	inf_path_ = new TCHAR[MAX_PATH];
@@ -202,15 +192,114 @@ void BaseService::Uninstall()
 
 void BaseService::Start()
 {
+	_tprintf_s(_T("[ ]\t Start\n"));
+
+	SC_HANDLE manager = nullptr;
+	SC_HANDLE service = nullptr;
+
+	manager = OpenSCManager(
+		nullptr,
+		nullptr,
+		SC_MANAGER_ALL_ACCESS
+	);
+
+	if (manager == nullptr)
+	{
+		PrintErrorMessage(GetLastError(), _T("[!]\t\t OpenSCManager -> %d, %s"));
+		return;
+	}
+
+	service = OpenService(
+		manager,
+		name_,
+		SERVICE_ALL_ACCESS
+	);
+
+	if (service == nullptr)
+	{
+		PrintErrorMessage(GetLastError(), _T("[!]\t\t OpenService -> %d, %s"));
+		CloseServiceHandle(manager);
+		return;
+	}
+
+	if (StartService(service, 0, nullptr) == false)
+	{
+		PrintErrorMessage(GetLastError(), _T("[!]\t\t StartService -> %d, %s"));
+		CloseServiceHandle(service);
+		CloseServiceHandle(manager);
+		return;
+	}
+
+	CloseServiceHandle(service);
+	CloseServiceHandle(manager);
+
+	OnStart();
 }
 
 void BaseService::Stop()
 {
+	_tprintf_s(_T("[ ]\t Stop\n"));
+
+	SC_HANDLE manager = nullptr;
+	SC_HANDLE service = nullptr;
+
+	manager = OpenSCManager(
+		nullptr,
+		nullptr,
+		SC_MANAGER_ALL_ACCESS
+	);
+
+	if (manager == nullptr)
+	{
+		PrintErrorMessage(GetLastError(), _T("[!]\t\t OpenSCManager -> %d, %s"));
+		return;
+	}
+
+	service = OpenService(
+		manager,
+		name_,
+		SERVICE_ALL_ACCESS
+	);
+
+	if (service == nullptr)
+	{
+		PrintErrorMessage(GetLastError(), _T("[!]\t\t OpenService -> %d, %s"));
+		CloseServiceHandle(manager);
+		return;
+	}
+
+	if (QueryServiceStatus(service, &service_status_) == false)
+	{
+		PrintErrorMessage(GetLastError(), _T("[!]\t\t QueryServiceStatus -> %d, %s"));
+		CloseServiceHandle(service);
+		CloseServiceHandle(manager);
+		return;
+	}
+
+	if (service_status_.dwCurrentState != SERVICE_STOPPED)
+	{
+		if (ControlService(service, SERVICE_CONTROL_STOP, &service_status_) == false)
+		{
+			PrintErrorMessage(GetLastError(), _T("[!]\t\t ControlService -> %d, %s"));
+			CloseServiceHandle(service);
+			CloseServiceHandle(manager);
+			return;
+		}
+		else
+		{
+			Sleep(2000);
+		}
+	}
+
+	CloseServiceHandle(service);
+	CloseServiceHandle(manager);
+
+	OnStop();
 }
 
 void BaseService::ServiceStart()
 {
-	_tprintf_s(_T("[ ]\t Start\n"));
+	_tprintf_s(_T("[ ]\t ServiceStart\n"));
 
 	ServiceReportStatus(SERVICE_START_PENDING, NO_ERROR, 3000);
 
@@ -221,7 +310,7 @@ void BaseService::ServiceStart()
 
 void BaseService::ServicePause()
 {
-	_tprintf_s(_T("[ ]\t Pause\n"));
+	_tprintf_s(_T("[ ]\t ServicePause\n"));
 
 	ServiceReportStatus(SERVICE_PAUSE_PENDING, NO_ERROR, 0);
 
@@ -232,7 +321,7 @@ void BaseService::ServicePause()
 
 void BaseService::ServiceContinue()
 {
-	_tprintf_s(_T("[ ]\t Continue\n"));
+	_tprintf_s(_T("[ ]\t ServiceContinue\n"));
 
 	ServiceReportStatus(SERVICE_CONTINUE_PENDING, NO_ERROR, 0);
 
@@ -243,7 +332,7 @@ void BaseService::ServiceContinue()
 
 void BaseService::ServiceStop()
 {
-	_tprintf_s(_T("[ ]\t Stop\n"));
+	_tprintf_s(_T("[ ]\t ServiceStop\n"));
 
 	ServiceReportStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
 
@@ -254,7 +343,7 @@ void BaseService::ServiceStop()
 
 void BaseService::ServiceShutdown()
 {
-	_tprintf_s(_T("[ ]\t Shutdown\n"));
+	_tprintf_s(_T("[ ]\t ServiceShutdown\n"));
 
 	OnShutdown();
 
