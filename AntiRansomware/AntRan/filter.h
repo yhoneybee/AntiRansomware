@@ -12,6 +12,9 @@ FilterPortOpen();
 VOID
 FilterPortClose();
 
+NTSTATUS
+PortSend(PVOID data, ULONG data_size, PVOID recv_buf, ULONG recv_buf_size, PULONG written_recv_buf);
+
 FLT_PREOP_CALLBACK_STATUS
 PrevCreateRoutine(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS flt_obj, PVOID* context);
 

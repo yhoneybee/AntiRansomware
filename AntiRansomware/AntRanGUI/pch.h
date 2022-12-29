@@ -11,7 +11,24 @@
 #include "framework.h"
 
 #include <fltUser.h>
+#include <strsafe.h>
+#include <SharedData.h>
 
-#define MY_LOG(format) OutputDebugStringA("[ AntRan GUI ] " __FUNCTION__ ": " format "\r\n");
+typedef struct
+{
+	FILTER_MESSAGE_HEADER hdr;
+	Filter2User data;
+} Filter2UserWrapper;
+
+typedef struct
+{
+	FILTER_REPLY_HEADER hdr;
+	User2Filter data;
+} User2FilterWrapper;
+
+#define MY_LOG(format, ...) \
+char log_format_dest[256];\
+StringCchPrintfA(log_format_dest, 256, "[ AntRan GUI ] " __FUNCTION__ ": " format "\r\n", ##__VA_ARGS__);\
+OutputDebugStringA(log_format_dest);
 
 #endif //PCH_H

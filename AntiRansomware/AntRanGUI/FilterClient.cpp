@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "FilterClient.h"
-#include <SharedData.h>
 
 FilterClient::FilterClient()
 {
-	if (IS_ERROR(FilterConnectCommunicationPort(PORT_NAME_W, 0, nullptr, 0, nullptr, &port_handle)))
+	HRESULT result = FilterConnectCommunicationPort(PORT_NAME, 0, nullptr, 0, nullptr, &port_handle);
+
+	if (IS_ERROR(result))
 	{
-		MY_LOG("FilterConnectCommunicationPort function was failed.");
+		MY_LOG("FilterConnectCommunicationPort function was failed(0x%x).", result);
 		return;
 	}
 
@@ -15,18 +16,26 @@ FilterClient::FilterClient()
 
 FilterClient::~FilterClient()
 {
+	HRESULT result = FilterClose(port_handle);
+
+	if (port_handle == nullptr || IS_ERROR(result))
+	{
+		MY_LOG("FilterClose function was failed(0x%x).", result);
+	}
 }
 
 HRESULT FilterClient::Send(LPCWSTR msg)
 {
 	HRESULT result = SEVERITY_SUCCESS;
 
-	Message reply;
-	ZeroMemory(&reply, sizeof(Message));
+	ZeroMemory(&sent, sizeof(sent));
+	StringCchCopyW(sent.data, BUF_SIZE, msg);
+
+	ZeroMemory(&sent_reply, sizeof(sent_reply));
 
 	DWORD returned_bytes = 0;
 
-	result = FilterSendMessage(port_handle, &msg, lstrlen(msg), &reply, sizeof(reply), &returned_bytes);
+	result = FilterSendMessage(port_handle, &sent, sizeof(sent), &sent_reply, sizeof(sent_reply), &returned_bytes);
 
 	if (IS_ERROR(result))
 	{
@@ -35,4 +44,37 @@ HRESULT FilterClient::Send(LPCWSTR msg)
 	}
 
 	return result;
+}
+
+void FilterClient::Recv()
+{
+	HRESULT result = SEVERITY_SUCCESS;
+
+	ZeroMemory(&recv, sizeof(recv));
+
+	ZeroMemory(&recv_reply, sizeof(recv_reply));
+
+	DWORD returned_bytes = 0;
+
+	result = FilterGetMessage(port_handle, &recv.hdr, sizeof(recv), nullptr);
+	if (IS_ERROR(result))
+	{
+		MY_LOG("FilterGetMessage function was failed(0x%x).", result);
+		return;
+	}
+
+	_wcsupr(recv.data.path);
+	if (wcsstr(recv.data.path, L"TEST.TXT"))
+	{
+		recv_reply.data.block = true;
+		MY_LOG("%ws file blocked", recv.data.path);
+	}
+	recv_reply.hdr.MessageId = recv.hdr.MessageId;
+
+	result = FilterReplyMessage(port_handle, &recv_reply.hdr, sizeof(recv_reply.hdr) + sizeof(recv_reply.data));
+	if (IS_ERROR(result))
+	{
+		MY_LOG("FilterReplyMessage function was failed(0x%x).", result);
+		return;
+	}
 }
