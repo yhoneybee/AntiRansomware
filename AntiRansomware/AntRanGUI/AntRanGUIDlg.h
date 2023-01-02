@@ -5,9 +5,7 @@
 #pragma once
 
 #include "FilterClient.h"
-
-#define WM_TRAY_NOTIFYICACTION WM_APP + 10
-#define TRAY_BALLOON 0
+#include "TrayIconController.h"
 
 // CAntRanGUIDlg dialog
 class CAntRanGUIDlg : public CDialogEx
@@ -26,7 +24,10 @@ public:
 
 private:
 	FilterClient client;
+	TrayIconController tray_icon_controller;
 
+private:
+	LRESULT OnTrayIconNotification(WPARAM wparam, LPARAM lparam);
 
 // Implementation
 protected:
@@ -42,5 +43,7 @@ protected:
 public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedCancel();
-	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedAddTray();
+	afx_msg void OnBnClickedShowBallon();
+	afx_msg void OnBnClickedSubTray();
 };

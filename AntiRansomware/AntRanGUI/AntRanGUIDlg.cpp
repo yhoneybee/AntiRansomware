@@ -61,13 +61,22 @@ void CAntRanGUIDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 }
 
+LRESULT CAntRanGUIDlg::OnTrayIconNotification(WPARAM wparam, LPARAM lparam)
+{
+	tray_icon_controller.OnTrayNotification(wparam, lparam);
+	return 0;
+}
+
 BEGIN_MESSAGE_MAP(CAntRanGUIDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &CAntRanGUIDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, &CAntRanGUIDlg::OnBnClickedCancel)
-	ON_BN_CLICKED(IDC_BUTTON1, &CAntRanGUIDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON1, &CAntRanGUIDlg::OnBnClickedAddTray)
+	ON_BN_CLICKED(IDC_BUTTON2, &CAntRanGUIDlg::OnBnClickedShowBallon)
+	ON_BN_CLICKED(IDC_BUTTON3, &CAntRanGUIDlg::OnBnClickedSubTray)
+	ON_MESSAGE(WM_TRAY_NOTIFYICACTION, &CAntRanGUIDlg::OnTrayIconNotification)
 END_MESSAGE_MAP()
 
 
@@ -103,6 +112,8 @@ BOOL CAntRanGUIDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+
+	tray_icon_controller.SetHWND(GetSafeHwnd());
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -182,10 +193,19 @@ void CAntRanGUIDlg::OnBnClickedCancel()
 }
 
 
-
-
-void CAntRanGUIDlg::OnBnClickedButton1()
+void CAntRanGUIDlg::OnBnClickedAddTray()
 {
-	// TODO: Add your control notification handler code here]
-	client.Recv();
+	tray_icon_controller.CreateTrayIcon();
+	// TODO: Add your control notification handler code here
+}
+
+void CAntRanGUIDlg::OnBnClickedShowBallon()
+{
+	// TODO: Add your control notification handler code here
+}
+
+void CAntRanGUIDlg::OnBnClickedSubTray()
+{
+	tray_icon_controller.DestroyTrayIcon();
+	// TODO: Add your control notification handler code here
 }

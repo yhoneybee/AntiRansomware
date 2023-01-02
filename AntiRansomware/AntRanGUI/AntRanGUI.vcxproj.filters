@@ -36,6 +36,9 @@
     <ClInclude Include="FilterClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TrayIconController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AntRanGUI.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FilterClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TrayIconController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

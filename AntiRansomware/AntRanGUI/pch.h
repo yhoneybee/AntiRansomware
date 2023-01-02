@@ -14,6 +14,10 @@
 #include <strsafe.h>
 #include <SharedData.h>
 
+#include <thread>
+
+#define WM_TRAY_NOTIFYICACTION			WM_APP + 1
+
 typedef struct
 {
 	FILTER_MESSAGE_HEADER hdr;
