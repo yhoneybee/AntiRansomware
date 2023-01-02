@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-class BaseService
+class NAME_EXPORT BaseService
 {
 public:
 	BaseService(

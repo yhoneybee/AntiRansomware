@@ -13,6 +13,7 @@
 #include <fltUser.h>
 #include <strsafe.h>
 #include <SharedData.h>
+#include <AntRanService.h>
 
 #include <thread>
 

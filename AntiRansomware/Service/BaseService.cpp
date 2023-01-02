@@ -4,7 +4,7 @@
  BaseService* BaseService::base_service_ = nullptr;
 
 BaseService::BaseService(LPCTSTR service_name, LPCTSTR display_name, LPCTSTR description)
-	:name_{ service_name }, display_{ display_name }, description_{ description }, sys_path_{ nullptr }, service_status_{ 0 }, service_status_handle_{ 0 }, service_event_{ 0 }, argc_{ 0 }, argv_{ 0 }
+	:name_{ service_name }, display_{ display_name }, description_{ description }, sys_path_{ nullptr }, inf_path_{ nullptr }, service_status_{0}, service_status_handle_{0}, service_event_{0}, argc_{0}, argv_{0}
 {
 }
 
