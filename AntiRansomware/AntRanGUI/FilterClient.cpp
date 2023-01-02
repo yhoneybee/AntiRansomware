@@ -4,17 +4,7 @@
 FilterClient::FilterClient()
 	:sent{ 0 }, sent_reply{ 0 }, recv{ 0 }, recv_reply{ 0 }, recv_routine{ nullptr }, is_routine_running{ false }
 {
-	HRESULT result = FilterConnectCommunicationPort(PORT_NAME, 0, nullptr, 0, nullptr, &port_handle);
-
-	if (IS_ERROR(result))
-	{
-		MY_MESSAGEBOX("FilterConnectCommunicationPort function was failed(0x%x).", result);
-		return;
-	}
-
-	StartRecvRoutine();
-
-	Send(L"HELLO~?");
+	Connect();
 }
 
 FilterClient::~FilterClient()
@@ -32,6 +22,22 @@ FilterClient::~FilterClient()
 	{
 		MY_MESSAGEBOX("FilterClose function was failed(0x%x).", result);
 	}
+}
+
+void FilterClient::Connect()
+{
+	HRESULT result = FilterConnectCommunicationPort(PORT_NAME, 0, nullptr, 0, nullptr, &port_handle);
+
+	if (IS_ERROR(result))
+	{
+		MY_MESSAGEBOX("FilterConnectCommunicationPort function was failed(0x%x).", result);
+		// again connect later.
+		return;
+	}
+
+	StartRecvRoutine();
+
+	Send(L"HELLO~?");
 }
 
 HRESULT FilterClient::Send(LPCWSTR msg)

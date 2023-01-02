@@ -5,7 +5,9 @@ public:
 	FilterClient();
 	~FilterClient();
 
+	void Connect();
 	HRESULT Send(LPCWSTR msg);
+
 	void StartRecvRoutine();
 	void StopRecvRoutine();
 private:
