@@ -128,9 +128,13 @@ NTSTATUS PortSend(PVOID data, ULONG data_size, PVOID recv_buf, ULONG recv_buf_si
 {
 	NTSTATUS status = STATUS_SUCCESS;
 
+	LARGE_INTEGER timeout;
+
 	if (recv_buf)
 	{
-		status = FltSendMessage(filter, &client_port, data, data_size, recv_buf, &recv_buf_size, nullptr);
+		timeout.QuadPart = TIME_SECONDS(1);
+
+		status = FltSendMessage(filter, &client_port, data, data_size, recv_buf, &recv_buf_size, &timeout);
 		if (!NT_SUCCESS(status))
 		{
 			MY_LOG("FltSendMessage(recv_buf was not null) function was failed(0x%x).", status);
@@ -141,7 +145,6 @@ NTSTATUS PortSend(PVOID data, ULONG data_size, PVOID recv_buf, ULONG recv_buf_si
 	}
 	else
 	{
-		LARGE_INTEGER timeout;
 		timeout.QuadPart = 0;
 
 		status = FltSendMessage(filter, &client_port, data, data_size, nullptr, nullptr, &timeout);
@@ -153,8 +156,6 @@ NTSTATUS PortSend(PVOID data, ULONG data_size, PVOID recv_buf, ULONG recv_buf_si
 
 		*written_recv_buf = 0;
 	}
-
-	MY_LOG("PortSend function was successful.");
 
 	return status;
 }
@@ -168,7 +169,7 @@ FLT_POSTOP_CALLBACK_STATUS PostCreateRoutine(PFLT_CALLBACK_DATA data, PCFLT_RELA
 {
 	if (client_port == nullptr)
 	{
-		MY_LOG("client_port was null.");
+		//MY_LOG("client_port was null.");
 		return FLT_POSTOP_FINISHED_PROCESSING;
 	}
 
@@ -180,18 +181,18 @@ FLT_POSTOP_CALLBACK_STATUS PostCreateRoutine(PFLT_CALLBACK_DATA data, PCFLT_RELA
 
 	PFLT_FILE_NAME_INFORMATION file_name_info = nullptr;
 	NTSTATUS status;
-	
+
 	status = FltGetFileNameInformation(data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &file_name_info);
 	if (!NT_SUCCESS(status))
 	{
-		MY_LOG("FltGetFileNameInformation(%wZ) function was failed(0x%x).", flt_obj->FileObject->FileName, status);
+		//MY_LOG("FltGetFileNameInformation function was failed(0x%x).", status);
 		return FLT_POSTOP_FINISHED_PROCESSING;
 	}
 
 	status = FltParseFileNameInformation(file_name_info);
 	if (!NT_SUCCESS(status))
 	{
-		MY_LOG("FltParseFileNameInformation(%wZ) function was failed(0x%x).", flt_obj->FileObject->FileName, status);
+		//MY_LOG("FltParseFileNameInformation function was failed(0x%x).", status);
 		FltReleaseFileNameInformation(file_name_info);
 		return FLT_POSTOP_FINISHED_PROCESSING;
 	}
