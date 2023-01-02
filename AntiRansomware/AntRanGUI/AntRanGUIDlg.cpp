@@ -77,6 +77,10 @@ BEGIN_MESSAGE_MAP(CAntRanGUIDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON2, &CAntRanGUIDlg::OnBnClickedShowBallon)
 	ON_BN_CLICKED(IDC_BUTTON3, &CAntRanGUIDlg::OnBnClickedSubTray)
 	ON_MESSAGE(WM_TRAY_NOTIFYICACTION, &CAntRanGUIDlg::OnTrayIconNotification)
+	ON_BN_CLICKED(IDC_BUTTON4, &CAntRanGUIDlg::OnBnClickedInstall)
+	ON_BN_CLICKED(IDC_BUTTON5, &CAntRanGUIDlg::OnBnClickedUninstall)
+	ON_BN_CLICKED(IDC_BUTTON6, &CAntRanGUIDlg::OnBnClickedStart)
+	ON_BN_CLICKED(IDC_BUTTON7, &CAntRanGUIDlg::OnBnClickedStop)
 END_MESSAGE_MAP()
 
 
@@ -208,4 +212,32 @@ void CAntRanGUIDlg::OnBnClickedSubTray()
 {
 	tray_icon_controller.DestroyTrayIcon();
 	// TODO: Add your control notification handler code here
+}
+
+
+void CAntRanGUIDlg::OnBnClickedInstall()
+{
+	// TODO: Add your control notification handler code here
+	service.InstallFromINF();
+}
+
+
+void CAntRanGUIDlg::OnBnClickedUninstall()
+{
+	// TODO: Add your control notification handler code here
+	service.Uninstall();
+}
+
+
+void CAntRanGUIDlg::OnBnClickedStart()
+{
+	// TODO: Add your control notification handler code here
+	service.Start();
+}
+
+
+void CAntRanGUIDlg::OnBnClickedStop()
+{
+	// TODO: Add your control notification handler code here
+	service.Stop();
 }

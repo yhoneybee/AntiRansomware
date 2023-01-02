@@ -24,6 +24,7 @@ public:
 
 private:
 	FilterClient client;
+	AntRanService service;
 	TrayIconController tray_icon_controller;
 
 private:
@@ -46,4 +47,8 @@ public:
 	afx_msg void OnBnClickedAddTray();
 	afx_msg void OnBnClickedShowBallon();
 	afx_msg void OnBnClickedSubTray();
+	afx_msg void OnBnClickedInstall();
+	afx_msg void OnBnClickedUninstall();
+	afx_msg void OnBnClickedStart();
+	afx_msg void OnBnClickedStop();
 };
