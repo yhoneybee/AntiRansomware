@@ -2,12 +2,13 @@
 #include "FilterClient.h"
 
 FilterClient::FilterClient()
+	:sent{ 0 }, sent_reply{ 0 }, recv{ 0 }, recv_reply{ 0 }
 {
 	HRESULT result = FilterConnectCommunicationPort(PORT_NAME, 0, nullptr, 0, nullptr, &port_handle);
 
 	if (IS_ERROR(result))
 	{
-		MY_LOG("FilterConnectCommunicationPort function was failed(0x%x).", result);
+		MY_MESSAGEBOX("FilterConnectCommunicationPort function was failed(0x%x).", result);
 		return;
 	}
 
@@ -16,11 +17,16 @@ FilterClient::FilterClient()
 
 FilterClient::~FilterClient()
 {
+	if (port_handle == nullptr)
+	{
+		return;
+	}
+
 	HRESULT result = FilterClose(port_handle);
 
-	if (port_handle == nullptr || IS_ERROR(result))
+	if (IS_ERROR(result))
 	{
-		MY_LOG("FilterClose function was failed(0x%x).", result);
+		MY_MESSAGEBOX("FilterClose function was failed(0x%x).", result);
 	}
 }
 
@@ -39,7 +45,7 @@ HRESULT FilterClient::Send(LPCWSTR msg)
 
 	if (IS_ERROR(result))
 	{
-		MY_LOG("FilterSendMessage function was failed.");
+		MY_MESSAGEBOX("FilterSendMessage function was failed.");
 		return result;
 	}
 
@@ -64,7 +70,7 @@ void FilterClient::Recv()
 	}
 
 	_wcsupr(recv.data.path);
-	if (wcsstr(recv.data.path, L"TEST.TXT"))
+	if (wcsstr(recv.data.path, L"YHONEY.BEE"))
 	{
 		recv_reply.data.block = true;
 		MY_LOG("%ws file blocked", recv.data.path);

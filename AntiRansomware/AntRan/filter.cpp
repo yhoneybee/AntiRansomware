@@ -2,10 +2,10 @@
 #include "filter.h"
 #include <SharedData.h>
 
-PFLT_FILTER filter;
+PFLT_FILTER filter = nullptr;
 
-PFLT_PORT filter_port;
-PFLT_PORT client_port;
+PFLT_PORT filter_port = nullptr;
+PFLT_PORT client_port = nullptr;
 
 FLT_OPERATION_REGISTRATION operations[] =
 {
@@ -133,7 +133,7 @@ NTSTATUS PortSend(PVOID data, ULONG data_size, PVOID recv_buf, ULONG recv_buf_si
 		status = FltSendMessage(filter, &client_port, data, data_size, recv_buf, &recv_buf_size, nullptr);
 		if (!NT_SUCCESS(status))
 		{
-			MY_LOG("FltSendMessage(recv_buf was not null) function was failed(%dl).", status);
+			MY_LOG("FltSendMessage(recv_buf was not null) function was failed(0x%x).", status);
 			return status;
 		}
 
@@ -147,7 +147,7 @@ NTSTATUS PortSend(PVOID data, ULONG data_size, PVOID recv_buf, ULONG recv_buf_si
 		status = FltSendMessage(filter, &client_port, data, data_size, nullptr, nullptr, &timeout);
 		if (!NT_SUCCESS(status))
 		{
-			MY_LOG("FltSendMessage(recv_buf was null) function was failed(%dl).", status);
+			MY_LOG("FltSendMessage(recv_buf was null) function was failed(0x%x).", status);
 			return status;
 		}
 
@@ -166,23 +166,32 @@ FLT_PREOP_CALLBACK_STATUS PrevCreateRoutine(PFLT_CALLBACK_DATA data, PCFLT_RELAT
 
 FLT_POSTOP_CALLBACK_STATUS PostCreateRoutine(PFLT_CALLBACK_DATA data, PCFLT_RELATED_OBJECTS flt_obj, PVOID context, FLT_POST_OPERATION_FLAGS flags)
 {
+	if (client_port == nullptr)
+	{
+		MY_LOG("client_port was null.");
+		return FLT_POSTOP_FINISHED_PROCESSING;
+	}
+
 	if (flt_obj == nullptr || flt_obj->FileObject == nullptr || flt_obj->FileObject->FileName.Buffer == nullptr)
 	{
+		MY_LOG("flt_obj or member of flt_obj was null.");
 		return FLT_POSTOP_FINISHED_PROCESSING;
 	}
 
 	PFLT_FILE_NAME_INFORMATION file_name_info = nullptr;
 	NTSTATUS status;
-
+	
 	status = FltGetFileNameInformation(data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &file_name_info);
 	if (!NT_SUCCESS(status))
 	{
+		MY_LOG("FltGetFileNameInformation(%wZ) function was failed(0x%x).", flt_obj->FileObject->FileName, status);
 		return FLT_POSTOP_FINISHED_PROCESSING;
 	}
 
 	status = FltParseFileNameInformation(file_name_info);
 	if (!NT_SUCCESS(status))
 	{
+		MY_LOG("FltParseFileNameInformation(%wZ) function was failed(0x%x).", flt_obj->FileObject->FileName, status);
 		FltReleaseFileNameInformation(file_name_info);
 		return FLT_POSTOP_FINISHED_PROCESSING;
 	}
@@ -200,6 +209,7 @@ FLT_POSTOP_CALLBACK_STATUS PostCreateRoutine(PFLT_CALLBACK_DATA data, PCFLT_RELA
 	status = PortSend(&sent, sizeof(sent), &reply, sizeof(reply), &returned_bytes);
 	if (NT_SUCCESS(status) && returned_bytes > 0 && reply.block)
 	{
+		MY_LOG("blocked(%ws).", sent.path);
 		data->IoStatus.Status = STATUS_ACCESS_DENIED;
 		FltReleaseFileNameInformation(file_name_info);
 		return FLT_POSTOP_FINISHED_PROCESSING;
@@ -221,6 +231,8 @@ NTSTATUS PortNotifyConnectRoutine(PFLT_PORT client, PVOID cookie, PVOID context,
 VOID PortNotifyDisconnectRoutine(PVOID cookie)
 {
 	MY_LOG("user mode application(%u) was disconnected.", PtrToUint(PsGetCurrentProcessId()));
+
+	client_port = nullptr;
 }
 
 NTSTATUS PortNotifyMessageRoutine(PVOID port_cookie, PVOID input_buf, ULONG input_buf_size, PVOID output_buf, ULONG output_buf_size, PULONG return_output_buf_length)

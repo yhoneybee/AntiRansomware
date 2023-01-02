@@ -67,6 +67,7 @@ BEGIN_MESSAGE_MAP(CAntRanGUIDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &CAntRanGUIDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, &CAntRanGUIDlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDC_BUTTON1, &CAntRanGUIDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -181,3 +182,10 @@ void CAntRanGUIDlg::OnBnClickedCancel()
 }
 
 
+
+
+void CAntRanGUIDlg::OnBnClickedButton1()
+{
+	// TODO: Add your control notification handler code here]
+	client.Recv();
+}

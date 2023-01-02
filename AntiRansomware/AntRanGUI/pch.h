@@ -26,9 +26,16 @@ typedef struct
 	User2Filter data;
 } User2FilterWrapper;
 
+#define GET_LOG_STRING(format, ...)\
+TCHAR log_format_dest[256];\
+StringCchPrintf(log_format_dest, 256, "[ AntRan GUI ] " __FUNCTION__ ": " L ## format "\r\n", ##__VA_ARGS__);\
+
 #define MY_LOG(format, ...) \
-char log_format_dest[256];\
-StringCchPrintfA(log_format_dest, 256, "[ AntRan GUI ] " __FUNCTION__ ": " format "\r\n", ##__VA_ARGS__);\
-OutputDebugStringA(log_format_dest);
+GET_LOG_STRING(format, ##__VA_ARGS__)\
+OutputDebugString(log_format_dest);
+
+#define MY_MESSAGEBOX(format, ...)\
+GET_LOG_STRING(format, ##__VA_ARGS__);\
+MessageBox(nullptr, log_format_dest, L"", MB_OK);
 
 #endif //PCH_H
