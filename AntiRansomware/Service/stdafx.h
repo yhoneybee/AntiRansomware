@@ -21,6 +21,8 @@
 #include <setupapi.h>
 #pragma comment(lib, "Setupapi.lib")
 #include <winsvc.h>
+#include <Shlwapi.h>
+#pragma comment(lib, "Shlwapi.lib")
 
 //	alias
 //		typedef
