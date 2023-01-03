@@ -2,26 +2,13 @@
 #include "FilterClient.h"
 
 FilterClient::FilterClient()
-	:sent{ 0 }, sent_reply{ 0 }, recv{ 0 }, recv_reply{ 0 }, recv_routine{ nullptr }, is_routine_running{ false }
+	:sent{ 0 }, sent_reply{ 0 }, recv{ 0 }, recv_reply{ 0 }, recv_routine{ nullptr }, is_routine_running{ false }, port_handle{ 0 }
 {
-	Connect();
 }
 
 FilterClient::~FilterClient()
 {
-	if (port_handle == nullptr)
-	{
-		return;
-	}
-
-	StopRecvRoutine();
-
-	HRESULT result = FilterClose(port_handle);
-
-	if (IS_ERROR(result))
-	{
-		MY_MESSAGEBOX("FilterClose function was failed(0x%x).", result);
-	}
+	Disconnect();
 }
 
 void FilterClient::Connect()
@@ -38,6 +25,23 @@ void FilterClient::Connect()
 	StartRecvRoutine();
 
 	Send(L"HELLO~?");
+}
+
+void FilterClient::Disconnect()
+{
+	if (port_handle == nullptr)
+	{
+		return;
+	}
+
+	StopRecvRoutine();
+
+	HRESULT result = FilterClose(port_handle);
+
+	if (IS_ERROR(result))
+	{
+		MY_MESSAGEBOX("FilterClose function was failed(0x%x).", result);
+	}
 }
 
 HRESULT FilterClient::Send(LPCWSTR msg)
@@ -89,6 +93,15 @@ void FilterClient::StopRecvRoutine()
 	recv_routine = nullptr;
 }
 
+void FilterClient::SetBlockedExtend(LPCWSTR extend)
+{
+	if (FAILED(StringCchCopy(blocked_extend, MAX_PATH, extend)))
+	{
+		MY_LOG("StringCchCopy function was failed.");
+		return;
+	}
+}
+
 void FilterClient::Recv()
 {
 	HRESULT result = SEVERITY_SUCCESS;
@@ -105,10 +118,10 @@ void FilterClient::Recv()
 	DWORD returned_bytes = 0;
 
 	_wcsupr(recv.data.path);
-	if (wcsstr(recv.data.path, L".BEE"))
+	if (wcsstr(recv.data.path, blocked_extend))
 	{
 		recv_reply.data.block = true;
-		MY_LOG("%ws file blocked", recv.data.path);
+		MY_LOG("%ws file was blocked", recv.data.path);
 	}
 	recv_reply.hdr.MessageId = recv.hdr.MessageId;
 
