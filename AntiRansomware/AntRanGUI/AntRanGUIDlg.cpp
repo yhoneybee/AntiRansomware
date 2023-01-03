@@ -20,12 +20,12 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// Dialog Data
+	// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 // Implementation
@@ -59,6 +59,7 @@ CAntRanGUIDlg::CAntRanGUIDlg(CWnd* pParent /*=nullptr*/)
 void CAntRanGUIDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_CHECK1, is_running_background);
 }
 
 LRESULT CAntRanGUIDlg::OnTrayIconNotification(WPARAM wparam, LPARAM lparam)
@@ -73,14 +74,13 @@ BEGIN_MESSAGE_MAP(CAntRanGUIDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &CAntRanGUIDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, &CAntRanGUIDlg::OnBnClickedCancel)
-	ON_BN_CLICKED(IDC_BUTTON1, &CAntRanGUIDlg::OnBnClickedAddTray)
 	ON_BN_CLICKED(IDC_BUTTON2, &CAntRanGUIDlg::OnBnClickedShowBallon)
-	ON_BN_CLICKED(IDC_BUTTON3, &CAntRanGUIDlg::OnBnClickedSubTray)
 	ON_MESSAGE(WM_TRAY_NOTIFYICACTION, &CAntRanGUIDlg::OnTrayIconNotification)
 	ON_BN_CLICKED(IDC_BUTTON4, &CAntRanGUIDlg::OnBnClickedInstall)
 	ON_BN_CLICKED(IDC_BUTTON5, &CAntRanGUIDlg::OnBnClickedUninstall)
 	ON_BN_CLICKED(IDC_BUTTON6, &CAntRanGUIDlg::OnBnClickedStart)
 	ON_BN_CLICKED(IDC_BUTTON7, &CAntRanGUIDlg::OnBnClickedStop)
+	ON_EN_CHANGE(IDC_EDIT1, &CAntRanGUIDlg::OnEnChangeFilter)
 END_MESSAGE_MAP()
 
 
@@ -128,6 +128,14 @@ void CAntRanGUIDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	{
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
+	}
+	else if (is_running_background.GetCheck())
+	{
+		if (nID == SC_CLOSE || nID == SC_MINIMIZE)
+		{
+			tray_icon_controller.CreateTrayIcon();
+			AfxGetApp()->m_pMainWnd->ShowWindow(SW_HIDE);
+		}
 	}
 	else
 	{
@@ -197,23 +205,13 @@ void CAntRanGUIDlg::OnBnClickedCancel()
 }
 
 
-void CAntRanGUIDlg::OnBnClickedAddTray()
-{
-	tray_icon_controller.CreateTrayIcon();
-	// TODO: Add your control notification handler code here
-}
-
 void CAntRanGUIDlg::OnBnClickedShowBallon()
 {
 	// TODO: Add your control notification handler code here
+	CString str;
+	GetDlgItemText(IDC_EDIT2, str);
+	tray_icon_controller.CreateBalloon(NIIF_NONE, _T("TITLE TEST"), str);
 }
-
-void CAntRanGUIDlg::OnBnClickedSubTray()
-{
-	tray_icon_controller.DestroyTrayIcon();
-	// TODO: Add your control notification handler code here
-}
-
 
 void CAntRanGUIDlg::OnBnClickedInstall()
 {
@@ -233,11 +231,29 @@ void CAntRanGUIDlg::OnBnClickedStart()
 {
 	// TODO: Add your control notification handler code here
 	service.Start();
+	client.Connect();
 }
 
 
 void CAntRanGUIDlg::OnBnClickedStop()
 {
 	// TODO: Add your control notification handler code here
+
+	client.Disconnect();
 	service.Stop();
 }
+
+
+void CAntRanGUIDlg::OnEnChangeFilter()
+{
+	CString str;
+	GetDlgItemText(IDC_EDIT1, str);
+	client.SetBlockedExtend(str);
+	// TODO:  If this is a RICHEDIT control, the control will not
+	// send this notification unless you override the CDialogEx::OnInitDialog()
+	// function and call CRichEditCtrl().SetEventMask()
+	// with the ENM_CHANGE flag ORed into the mask.
+
+	// TODO:  Add your control notification handler code here
+}
+

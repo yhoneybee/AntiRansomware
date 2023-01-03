@@ -33,7 +33,7 @@ typedef struct
 
 #define GET_LOG_STRING(format, ...)\
 TCHAR log_format_dest[256];\
-StringCchPrintf(log_format_dest, 256, "[ AntRan GUI ] " __FUNCTION__ ": " L ## format "\r\n", ##__VA_ARGS__);\
+StringCchPrintf(log_format_dest, 256, _T("[ AntRan GUI ] ") __FUNCTIONW__ _T(": ") _T(format) _T("\r\n"), ##__VA_ARGS__);\
 
 #define MY_LOG(format, ...) \
 GET_LOG_STRING(format, ##__VA_ARGS__)\
@@ -41,6 +41,6 @@ OutputDebugString(log_format_dest);
 
 #define MY_MESSAGEBOX(format, ...)\
 GET_LOG_STRING(format, ##__VA_ARGS__);\
-MessageBox(nullptr, log_format_dest, L"", MB_OK);
+MessageBox(nullptr, log_format_dest, L"", MB_OK | MB_SERVICE_NOTIFICATION);
 
 #endif //PCH_H

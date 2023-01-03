@@ -44,11 +44,11 @@ protected:
 public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedCancel();
-	afx_msg void OnBnClickedAddTray();
 	afx_msg void OnBnClickedShowBallon();
-	afx_msg void OnBnClickedSubTray();
 	afx_msg void OnBnClickedInstall();
 	afx_msg void OnBnClickedUninstall();
 	afx_msg void OnBnClickedStart();
 	afx_msg void OnBnClickedStop();
+	afx_msg void OnEnChangeFilter();
+	CButton is_running_background;
 };
