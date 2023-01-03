@@ -5,10 +5,14 @@
 #include "AntRanGUI.h"
 #include "TrayIconController.h"
 
+constexpr UINT TRAY_FLAGS = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+constexpr UINT BALLOON_FLAGS = NIF_ICON | NIF_MESSAGE | NIF_INFO;
+
 
 // TrayIconController
 
 TrayIconController::TrayIconController()
+	:wnd_handle{ 0 }, visible_tray{ false }, tray_nid{ 0 }
 {
 }
 
@@ -28,24 +32,37 @@ void TrayIconController::CreateTrayIcon()
 	{
 		return;
 	}
-	InitNotifyIconData();
-	Shell_NotifyIcon(NIM_ADD, &notify_icon_data);
+	InitTrayNotifyIconData();
+	if (Shell_NotifyIcon(NIM_ADD, &tray_nid) == false)
+	{
+		Shell_NotifyIcon(NIM_MODIFY, &tray_nid);
+	}
+	visible_tray = true;
 }
 
 void TrayIconController::DestroyTrayIcon()
 {
-	if (!visible_tray) 
+	if (!visible_tray)
 	{
 		return;
 	}
-	InitNotifyIconData();
-	Shell_NotifyIcon(NIM_DELETE, &notify_icon_data);
+	InitTrayNotifyIconData();
+	Shell_NotifyIcon(NIM_DELETE, &tray_nid);
+	visible_tray = false;
+}
+
+void TrayIconController::CreateBalloon(DWORD info_flags, LPCTSTR title, LPCTSTR text)
+{
+	InitBalloonNotifyIconData(info_flags, title, text);
+	if (Shell_NotifyIcon(NIM_ADD, &balloon_nid) == false)
+	{
+		Shell_NotifyIcon(NIM_MODIFY, &balloon_nid);
+	}
+	Shell_NotifyIcon(NIM_DELETE, &balloon_nid);
 }
 
 void TrayIconController::OnTrayNotification(WPARAM wparam, LPARAM lparam)
 {
-	SetForegroundWindow(wnd_handle);
-
 	switch (lparam)
 	{
 	case WM_RBUTTONDOWN:
@@ -57,25 +74,40 @@ void TrayIconController::OnTrayNotification(WPARAM wparam, LPARAM lparam)
 		CMenu* sub_menu = menu.GetSubMenu(0);
 		sub_menu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 	}
-		break;
+	break;
 	case WM_LBUTTONDBLCLK:
 	{
+		AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOW);
 		DestroyTrayIcon();
 	}
-		break;
+	break;
 	}
 }
 
-void TrayIconController::InitNotifyIconData()
+void TrayIconController::InitTrayNotifyIconData()
 {
-	ZeroMemory(&notify_icon_data, sizeof(notify_icon_data));
-	notify_icon_data.cbSize = sizeof(notify_icon_data);
-	notify_icon_data.uID = 0;
-	notify_icon_data.hWnd = wnd_handle;
-	notify_icon_data.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
-	notify_icon_data.hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	lstrcpy(notify_icon_data.szTip, _T("hi."));
-	notify_icon_data.uCallbackMessage = WM_TRAY_NOTIFYICACTION;
+	ZeroMemory(&tray_nid, sizeof(tray_nid));
+	InitNotifyIconData(&tray_nid, TRAY_FLAGS);
+	lstrcpy(tray_nid.szTip, _T("AntRan"));
+}
+
+void TrayIconController::InitBalloonNotifyIconData(DWORD info_flags, LPCTSTR title, LPCTSTR text)
+{
+	ZeroMemory(&balloon_nid, sizeof(balloon_nid));
+	InitNotifyIconData(&balloon_nid, BALLOON_FLAGS);
+	balloon_nid.dwInfoFlags = info_flags;
+	lstrcpy(balloon_nid.szInfoTitle, title);
+	lstrcpy(balloon_nid.szInfo, text);
+}
+
+void TrayIconController::InitNotifyIconData(NOTIFYICONDATA* nid, UINT flags)
+{
+	nid->cbSize = sizeof(NOTIFYICONDATA);
+	nid->uID = 0;
+	nid->hWnd = wnd_handle;
+	nid->uFlags = flags;
+	nid->hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	nid->uCallbackMessage = WM_TRAY_NOTIFYICACTION;
 }
 
 
